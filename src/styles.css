@@ -92,10 +92,13 @@ a{color:var(--accent)}
 svg{display:block}
 
 .item{cursor:pointer}
-.item .core{transition:opacity .22s ease}
+.item .core{transition:opacity .22s ease, fill .2s ease, stroke .2s ease}
 .item:hover .core{opacity:.58}
-.item .lbl, .item .ptag{transition:fill .22s ease}
-.item.sel .hit{stroke:var(--accent); stroke-width:1.4; stroke-dasharray:3 3; fill:none}
+.item .lbl, .item .ptag{transition:fill .2s ease}
+.item:focus{outline:none}
+.item:focus-visible{outline:none}
+.item.sel .core, .item:focus-visible .core{fill:var(--accent); stroke:var(--accent); opacity:1}
+.item.sel .lbl, .item:focus-visible .lbl{fill:var(--accent); font-weight:600}
 @keyframes unfold{from{opacity:0; transform:translateY(7px)} to{opacity:1; transform:none}}
 .item.unfold{animation:unfold .55s cubic-bezier(.2,.7,.2,1) both; animation-delay:var(--d,0s)}
 @media (prefers-reduced-motion: reduce){.item.unfold{animation:none}}
