@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Cache-Control" content="no-store" />
+<title>Life Timeline</title>
+<style>
+  :root{
+    --paper:#f6f3ec; --paper2:#fcfaf5; --ink:#211e19; --ink2:#5f594f; --faint:#6b6557;
+    --hair:#e4ddd0; --hair2:#efe9dd; --accent:#b0492e; --wash:#efe1d4;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--paper); color:var(--ink); font-family:var(--serif); font-size:15px; line-height:1.5;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:3px}
+  button{font:inherit; cursor:pointer; color:inherit}
+  .micro{font-family:var(--sans); font-size:9px; letter-spacing:.14em; text-transform:uppercase; fill:var(--faint); color:var(--faint)}
+
+  header{padding:46px 56px 30px; max-width:1500px}
+  h1{margin:0; font-size:30px; font-weight:500; letter-spacing:-0.015em}
+  .lede{margin-top:8px; font-size:16px; color:var(--ink2); max-width:46ch; line-height:1.55}
+  .persona{margin-top:18px; font-family:var(--sans); font-size:12px; letter-spacing:.02em; color:var(--faint)}
+  .persona b{color:var(--ink2); font-weight:600}
+
+  .lensrow{display:flex; gap:54px; align-items:flex-start; margin-top:30px; flex-wrap:wrap}
+  .lens{}
+  .lens .lk{font-family:var(--sans); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--faint); margin-bottom:10px}
+  .lrow{display:flex; align-items:baseline; gap:14px}
+  .lrow .ll{font-style:italic; color:var(--ink2); font-size:15px}
+  .opts{display:inline-flex; gap:14px}
+  .opts button{border:none; background:none; padding:0; font-family:var(--serif); font-size:15px; color:var(--faint); position:relative}
+  .opts button[aria-pressed="true"]{color:var(--ink); text-decoration:underline; text-underline-offset:5px; text-decoration-color:var(--accent); text-decoration-thickness:1.5px}
+  .opts button:hover{color:var(--ink2)}
+  .lread{font-style:italic; color:var(--ink2); font-size:14px; margin-top:9px}
+  .lread::before{content:"— "; color:var(--faint); font-style:normal}
+  .legend{font-family:var(--sans); font-size:11px; letter-spacing:.02em; color:var(--faint); line-height:1.9}
+  .legend .a{color:var(--accent)}
+
+  .main{display:flex; align-items:flex-start; border-top:1px solid var(--hair); margin:8px 56px 64px; max-width:1500px}
+  .leftcol{width:236px; min-width:236px; display:flex; flex-direction:column}
+  .axis-spacer{height:56px; position:sticky; top:0; z-index:6; background:var(--paper); display:flex; align-items:center; justify-content:space-between;
+    padding:0 20px 0 4px; font-family:var(--sans); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--faint)}
+  .acts button{border:none; background:none; font-family:var(--sans); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); padding:0 2px}
+  .acts button:hover{color:var(--ink)}
+  .acts span{color:var(--hair)}
+  .dhead{position:relative; text-align:left; border:none; border-top:1px solid var(--hair2); background:none; padding:18px 16px 16px 4px; display:flex; flex-direction:column; gap:5px; overflow:hidden; transition:background .25s}
+  .dhead:hover{background:var(--paper2)}
+  .dhead .nm{display:flex; align-items:baseline; gap:10px; font-size:18px; font-weight:500; color:var(--ink); letter-spacing:-0.01em}
+  .dhead .chev{font-family:var(--sans); font-size:13px; color:var(--accent); width:12px; font-weight:600}
+  .dhead .sm{font-family:var(--sans); font-size:11.5px; color:var(--faint); padding-left:22px; line-height:1.45}
+  .dhead .upd{display:none; padding-left:22px; margin-top:3px; font-family:var(--sans); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent)}
+  .dhead .upd::before{content:"› "; }
+  .dhead.changed .upd{display:block}
+  @keyframes wash{0%{background:var(--wash)}100%{background:transparent}}
+  .dhead.flash{animation:wash 2.2s ease-out 1}
+  @media (prefers-reduced-motion: reduce){.dhead.flash{animation:none}.dhead.changed{background:var(--paper2)}}
+  .addbtn{margin:10px 0 2px 22px; align-self:flex-start; font-family:var(--sans); font-size:11px; letter-spacing:.04em; color:var(--ink2); background:none; border:none; border-bottom:1px solid var(--hair); padding:0 0 2px}
+  .addbtn:hover{border-color:var(--accent); color:var(--ink)}
+
+  .right{flex:1; min-width:0; display:flex; flex-direction:column}
+  .axis{position:sticky; top:0; z-index:5; background:var(--paper)}
+  .canvas{position:relative}
+  svg{display:block}
+  .item{cursor:pointer}
+  .item .core{transition:opacity .2s}
+  .item:hover .core{opacity:.62}
+  .item.sel .hit{stroke:var(--accent); stroke-width:1.4; stroke-dasharray:3 3; fill:none}
+  .lbl{font-family:var(--serif); font-size:13px; fill:var(--ink); paint-order:stroke; stroke:var(--paper); stroke-width:3.5px; stroke-linejoin:round}
+
+  .detail{width:368px; min-width:368px; align-self:stretch; padding:56px 40px 40px; position:sticky; top:0; border-left:1px solid var(--hair)}
+  .detail .hint{color:var(--ink2); font-size:16px; line-height:1.6; max-width:34ch}
+  .detail .dom{font-family:var(--sans); font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--faint)}
+  .detail h3{margin:10px 0 3px; font-size:23px; font-weight:500; line-height:1.2; letter-spacing:-0.015em}
+  .detail h3 .a{color:var(--accent)}
+  .when{color:var(--ink2); font-style:italic; font-size:14px; margin-bottom:18px}
+  .prov{font-family:var(--sans); font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--ink2); padding-bottom:14px; border-bottom:1px solid var(--hair)}
+  .sent{font-style:italic; color:var(--ink); margin-left:4px}
+  .kv{margin-top:16px}
+  .kv .k{font-family:var(--sans); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); margin-bottom:5px}
+  .kv .v{font-size:15px; color:var(--ink); line-height:1.5}
+  .meter{height:3px; background:var(--hair); margin-top:8px; position:relative}
+  .meter > i{position:absolute; left:0; top:0; height:100%; background:var(--ink)}
+  .block{margin-top:18px; padding-left:14px; border-left:2px solid var(--accent)}
+  .block .k{font-family:var(--sans); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin-bottom:5px}
+  .block .v{font-size:14px; color:var(--ink2); line-height:1.5}
+  .block.q{border-left-color:var(--hair)}
+  .block.q .k{color:var(--faint)}
+  .adjust{margin-top:26px; background:none; border:none; border-bottom:1px solid var(--ink); padding:0 0 3px; font-size:15px; color:var(--ink)}
+  .adjust:hover{border-color:var(--accent); color:var(--accent)}
+  .note{margin-top:16px; font-family:var(--sans); font-size:11.5px; color:var(--faint); line-height:1.6; max-width:34ch}
+</style>
+</head>
+<body>
+<header>
+  <h1>Life Timeline</h1>
+  <div class="lede">Your life as a timeline of overlapping phases and dated events, each sourced and labeled by confidence.</div>
+  <div class="persona"><b>born 1985</b> &nbsp;·&nbsp; male &nbsp;·&nbsp; raised US Midwest &nbsp;·&nbsp; knowledge worker &nbsp;·&nbsp; married 2013 &nbsp;·&nbsp; two children (2015, 2018) &nbsp;·&nbsp; parents born ≈1958</div>
+
+  <div class="lensrow">
+    <div class="lens">
+      <div class="lk">Disposition</div>
+      <div class="lrow">
+        <span class="ll">Caregiving propensity</span>
+        <span class="opts" role="group" aria-label="Caregiving propensity">
+          <button data-p="low"  aria-pressed="false">low</button>
+          <button data-p="med"  aria-pressed="true">med</button>
+          <button data-p="high" aria-pressed="false">high</button>
+        </span>
+      </div>
+      <div class="lread" id="dispRel">Relationship persistence: moderate</div>
+      <div class="lread" id="dispTilt">Career–family balance: even</div>
+    </div>
+    <div class="lens">
+      <div class="lk">Legend</div>
+      <div class="legend">
+        <span class="a">▬</span> solid = recorded &nbsp;&nbsp; <span style="opacity:.5">▬</span> light = data &nbsp;&nbsp; ─ line = projected<br>
+        <span class="a">│</span> now &nbsp;&nbsp; <span class="a">✦</span> derived &nbsp;&nbsp; ▲ / ▼ sentiment
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="main">
+  <div class="leftcol" id="leftcol"></div>
+  <div class="right">
+    <div class="axis" id="axis"></div>
+    <div class="canvas" id="canvas"></div>
+  </div>
+  <aside class="detail" id="detail">
+    <div class="hint">Open a domain on the left, then click any mark to see its basis, source, confidence, and provenance.</div>
+    <div class="note">Mockup. Numbers are illustrative, not a forecast. Set caregiving propensity to high and watch Career and Partner flag a change.</div>
+  </aside>
+</div>
+
+<script>
+/* ============ config ============ */
+const BIRTH=1985, NOW=2026, SPAN_END=2078;
+const AXIS_H=56, PADL=8, PADR=24;
+const laneH=34, laneGap=14, INPAD=20, COLLAPSED_H=66, MIN_EXP_H=120;
+const LABEL_DY=12, CY_DY=27, H_BAR=9, MK=4.5;
+let rightW=1000, yearW=10;
+const x=y=>PADL+(y-BIRTH)*yearW, age=y=>y-BIRTH;
+
+/* ============ domains ============ */
+const DOMAINS=[
+  {id:'self',label:'Self & Health'},{id:'career',label:'Career'},{id:'finances',label:'Finances'},
+  {id:'partner',label:'Partner'},{id:'children',label:'Children'},{id:'parents',label:'Parents'},
+];
+const DOM=Object.fromEntries(DOMAINS.map(d=>[d.id,d]));
+
+/* ============ data (engine output contract) ============ */
+const pt=(est,lo,hi)=>({est,lo:lo??est,hi:hi??est});
+const Sn=(v,label)=>({v,label});
+const ITEMS=[
+  // SELF & HEALTH
+  {id:'born',dom:'self',kind:'event',label:'Born',at:pt(1985),prov:'recorded',conf:1,addedBy:'onboarding',basis:'Stated in profile.',source:'User profile'},
+  {id:'childhood',dom:'self',kind:'phase',label:'Childhood & education',s:pt(1985),e:pt(2003),prov:'recorded',conf:1,addedBy:'onboarding',basis:'Birth year plus typical schooling span.',source:'User profile'},
+  {id:'thumb',dom:'self',kind:'event',label:'Broke thumb',at:pt(2009),prov:'recorded',conf:1,addedBy:'deep-dive',historical:true,sentiment:Sn(-1,'painful (minor)'),basis:'Added on a deep dive; not captured at onboarding.',source:'You (deep dive)'},
+  {id:'thyroid',dom:'self',kind:'event',label:'Thyroid cancer (recovered)',at:pt(2017),prov:'recorded',conf:1,addedBy:'deep-dive',historical:true,sentiment:Sn(-2,'frightening'),basis:'Past illness added on deep dive; recovered. Shifts future risk priors and disposition.',source:'You (deep dive)'},
+  {id:'recovery',dom:'self',kind:'phase',label:'Recovery & remission',s:pt(2017),e:pt(2019),prov:'recorded',conf:1,addedBy:'deep-dive',historical:true,sentiment:Sn(1,'relief'),basis:'Recovery window after treatment.',source:'You (deep dive)'},
+  {id:'peakhealth',dom:'self',kind:'phase',label:'Peak physical health',s:pt(2003),e:pt(2026,2024,2030),prov:'data',conf:.8,addedBy:'onboarding',basis:'Physiological performance peaks in the 20s–30s, then eases.',source:'Exercise-physiology norms'},
+  {id:'decline',dom:'self',kind:'phase',label:'Gradual physiological decline',s:pt(2026,2024,2030),e:pt(2055),prov:'inferred',conf:.55,addedBy:'onboarding',basis:'Inferred continuation of age-related decline; not individualized.',source:'Heuristic (age curve)'},
+  {id:'cvd',dom:'self',kind:'event',label:'Cardiovascular risk rises',at:pt(2040,2036,2046),prov:'data',conf:.7,addedBy:'onboarding',basis:'Age-stratified cardiovascular incidence climbs from the mid-50s for males.',source:'CVD epidemiology'},
+  {id:'illness',dom:'self',kind:'phase',label:'Age-linked illness risk',s:pt(2055,2050,2058),e:pt(2068),prov:'data',conf:.65,addedBy:'onboarding',basis:'Age-specific morbidity curves.',source:'Population morbidity data'},
+  {id:'death',dom:'self',kind:'event',label:'Life expectancy (est.)',at:pt(2068,2061,2076),prov:'data',conf:.6,addedBy:'onboarding',basis:'Period life table for a US male, conditioned on current age.',source:'SSA period life table'},
+  // CAREER
+  {id:'work',dom:'career',kind:'event',label:'Enters workforce',at:pt(2008),prov:'recorded',conf:1,addedBy:'onboarding',basis:'Education end plus typical entry age.',source:'User profile'},
+  {id:'early',dom:'career',kind:'phase',label:'Early career',s:pt(2008),e:pt(2018),prov:'recorded',conf:1,addedBy:'onboarding',basis:'Observed history.',source:'User profile'},
+  {id:'peakearn',dom:'career',kind:'phase',label:'Peak earning years',s:pt(2020,2018,2022),e:pt(2050,2047,2055),prov:'data',conf:.72,addedBy:'onboarding',basis:'Earnings-by-age curve for knowledge work peaks ~45–60.',source:'BLS income-by-age'},
+  {id:'plateau',dom:'career',kind:'event',label:'Career role-shift',at:pt(2046,2042,2052),prov:'inferred',conf:.45,addedBy:'onboarding',dispo:true,derived:['caregiving'],basis:'A deprioritization of career, often coinciding with eldercare.',source:'Heuristic (disposition-driven)'},
+  {id:'retire',dom:'career',kind:'event',label:'Retirement',at:pt(2050,2047,2056),prov:'data',conf:.6,addedBy:'onboarding',basis:'Average US retirement age, adjusted for profession.',source:'Retirement-age statistics'},
+  {id:'encore',dom:'career',kind:'phase',label:'Wind-down / encore work',s:pt(2050,2047,2056),e:pt(2056),prov:'inferred',conf:.4,addedBy:'onboarding',basis:'Inferred partial-work tail after retirement.',source:'Heuristic'},
+  // FINANCES
+  {id:'mortgage',dom:'finances',kind:'phase',label:'Mortgage',s:pt(2016),e:pt(2046),prov:'data',conf:.7,addedBy:'onboarding',basis:'Recorded start; 30-year amortization to payoff.',source:'User profile + loan term'},
+  {id:'college',dom:'finances',kind:'phase',label:"Children's college costs",s:pt(2033,2031,2035),e:pt(2040,2038,2043),prov:'inferred',conf:.5,addedBy:'onboarding',derived:['c1born','c2born'],basis:'Derived from children reaching college age.',source:'Heuristic (derived)'},
+  {id:'savings',dom:'finances',kind:'phase',label:'Peak savings',s:pt(2035),e:pt(2050),prov:'inferred',conf:.45,addedBy:'onboarding',basis:'Inferred high-savings window between peak income and retirement.',source:'Heuristic'},
+  {id:'drawdown',dom:'finances',kind:'phase',label:'Retirement drawdown',s:pt(2050,2047,2056),e:pt(2068),prov:'inferred',conf:.45,addedBy:'onboarding',basis:'Inferred decumulation after retirement.',source:'Heuristic'},
+  // PARTNER
+  {id:'rel1',dom:'partner',kind:'phase',label:'College relationship',s:pt(2005),e:pt(2008),prov:'recorded',conf:1,addedBy:'deep-dive',historical:true,sentiment:Sn(1,'formative'),basis:'Past relationship, added on deep dive.',source:'You (deep dive)'},
+  {id:'rel2',dom:'partner',kind:'phase',label:'Long relationship (ended)',s:pt(2009),e:pt(2012),prov:'recorded',conf:1,addedBy:'deep-dive',historical:true,sentiment:Sn(-2,'hard ending'),basis:'Past relationship; how it ended informs disposition.',source:'You (deep dive)'},
+  {id:'marriage',dom:'partner',kind:'event',label:'Marriage',at:pt(2013),prov:'recorded',conf:1,addedBy:'onboarding',sentiment:Sn(2,'positive'),basis:'Stated in profile.',source:'User profile'},
+  {id:'coparent',dom:'partner',kind:'phase',label:'Co-parenting years',s:pt(2015),e:pt(2036,2034,2039),prov:'data',conf:.75,addedBy:'onboarding',basis:'Bounded by children at home.',source:'Derived from children'},
+  {id:'emptypartner',dom:'partner',kind:'phase',label:'Empty-nest partnership',s:pt(2036,2034,2039),e:pt(2068),prov:'inferred',conf:.5,addedBy:'onboarding',dispo:true,derived:['c2leave'],basis:'Inferred relationship phase after children leave.',source:'Heuristic (derived)'},
+  // CHILDREN
+  {id:'c1born',dom:'children',kind:'event',label:'Child 1 born',at:pt(2015),prov:'recorded',conf:1,addedBy:'onboarding',sentiment:Sn(2,'joy'),basis:'Stated in profile.',source:'User profile'},
+  {id:'c2born',dom:'children',kind:'event',label:'Child 2 born',at:pt(2018),prov:'recorded',conf:1,addedBy:'onboarding',sentiment:Sn(2,'joy'),basis:'Stated in profile.',source:'User profile'},
+  {id:'parenting',dom:'children',kind:'phase',label:'Children at home',s:pt(2015),e:pt(2036,2034,2039),prov:'data',conf:.8,addedBy:'onboarding',basis:'From first birth to the youngest leaving home.',source:'Derived from children'},
+  {id:'c1leave',dom:'children',kind:'event',label:'Child 1 leaves home',at:pt(2033,2031,2036),prov:'data',conf:.65,addedBy:'onboarding',derived:['c1born'],basis:'Typical age of leaving home (~18–21).',source:'Household-transition data'},
+  {id:'c2leave',dom:'children',kind:'event',label:'Child 2 leaves home',at:pt(2036,2034,2039),prov:'data',conf:.65,addedBy:'onboarding',derived:['c2born'],basis:'Typical age of leaving home (~18–21).',source:'Household-transition data'},
+  {id:'emptynest',dom:'children',kind:'phase',label:'Empty nest',s:pt(2036,2034,2039),e:pt(2068),prov:'inferred',conf:.45,addedBy:'onboarding',basis:'Inferred phase after the youngest leaves.',source:'Heuristic'},
+  // PARENTS
+  {id:'pindep',dom:'parents',kind:'phase',label:'Parents independent',s:pt(2026),e:pt(2034,2032,2037),prov:'data',conf:.6,addedBy:'onboarding',basis:'Parents ~68 now; independent until later-life decline.',source:'Derived from parent ages'},
+  {id:'pdecline',dom:'parents',kind:'phase',label:"Parents' decline",s:pt(2034,2032,2037),e:pt(2043,2038,2049),prov:'inferred',conf:.5,addedBy:'onboarding',basis:'Inferred decline preceding end of life.',source:'Heuristic (age)'},
+  {id:'caregiving',dom:'parents',kind:'phase',label:'Eldercare / caregiving',s:pt(2034,2032,2037),e:pt(2043,2038,2049),prov:'inferred',conf:.5,addedBy:'onboarding',dispo:true,highlight:true,sentiment:Sn(-1,'anticipated strain'),derived:['p1death','p2death'],affects:['plateau','emptypartner'],basis:'Active caregiving typically spans the final 5–10 years of a parent’s life. Derived from the parental-mortality estimates and sized by caregiving propensity; drives the career role-shift and partner strain.',source:'Heuristic (derived + disposition)'},
+  {id:'p1death',dom:'parents',kind:'event',label:'Parent 1 death (est.)',at:pt(2040,2036,2046),prov:'data',conf:.6,addedBy:'onboarding',basis:'Period life table from parent birth (~1958); central estimate at age ~82.',source:'SSA period life table'},
+  {id:'p2death',dom:'parents',kind:'event',label:'Parent 2 death (est.)',at:pt(2043,2038,2049),prov:'data',conf:.6,addedBy:'onboarding',basis:'Period life table from parent birth (~1958); central estimate at age ~85.',source:'SSA period life table'},
+];
+const BYID=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
+
+/* ============ disposition ============ */
+const PROJECT={caregiving:{low:{s:2036,e:2043},med:{s:2034,e:2043},high:{s:2031,e:2044}},plateau:{low:2049,med:2046,high:2042}};
+const PARTNER_RISK={low:false,med:false,high:true};
+const DISP_TILT={low:'Career–family balance: toward career',med:'Career–family balance: even',high:'Career–family balance: toward family'};
+function snapshot(){return{cgS:BYID.caregiving.s.est,cgE:BYID.caregiving.e.est,plat:BYID.plateau.at.est,risk:!!BYID.emptypartner.risk};}
+function applyProjection(p){
+  const cg=PROJECT.caregiving[p];
+  BYID.caregiving.s=pt(cg.s,cg.s-2,cg.s+2); BYID.caregiving.e=pt(cg.e,cg.e-2,cg.e+3);
+  BYID.pdecline.s=pt(cg.s,cg.s-2,cg.s+2);
+  const pl=PROJECT.plateau[p]; BYID.plateau.at=pt(pl,pl-4,pl+5);
+  BYID.emptypartner.risk=PARTNER_RISK[p];
+}
+
+/* ============ state ============ */
+const STATE={prop:'med',open:new Set(['self']),multi:false,selected:null,changedDomains:new Set(),changedItems:new Set(),prevPos:{}};
+applyProjection('med');
+
+/* ============ geometry + packing ============ */
+function geom(it){
+  if(it.kind==='event'){
+    const cx=x(it.at.est),lox=x(it.at.lo),hix=x(it.at.hi),labW=it.label.length*6.8+30;
+    return {cx,lox,hix,coreL:cx-MK,coreR:cx+MK,minPx:Math.min(lox,cx-MK),maxPx:Math.max(hix,cx)+labW};
+  }
+  const sL=x(it.s.lo),sE=x(it.s.est),eE=x(it.e.est),eH=x(it.e.hi),labW=it.label.length*6.8+24;
+  return {sL,sE,eE,eH,coreL:sE,coreR:eE,minPx:Math.min(sL,sE),maxPx:Math.max(eH,eE,sE+labW)};
+}
+function pack(items){
+  const lanes=[],sorted=[...items].sort((a,b)=>a._g.minPx-b._g.minPx);
+  for(const it of sorted){let placed=false;
+    for(let l=0;l<lanes.length;l++){if(lanes[l]+12<=it._g.minPx){lanes[l]=it._g.maxPx;it._lane=l;placed=true;break;}}
+    if(!placed){it._lane=lanes.length;lanes.push(it._g.maxPx);}}
+  return lanes.length||1;
+}
+function visibleItems(){return ITEMS.slice();}
+
+/* ============ helpers ============ */
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+const PROVWORD={recorded:'recorded',data:'data',inferred:'projected'};
+const INK='#211e19',INK2='#5f594f',FAINT='#6b6557',ACCENT='#b0492e',PAPER='#f6f3ec',HAIR='#e4ddd0';
+function alpha(hex,a){const n=parseInt(hex.slice(1),16);return `rgba(${n>>16},${(n>>8)&255},${n&255},${a})`;}
+
+/* ============ layout ============ */
+function buildLayout(){
+  const items=visibleItems(); items.forEach(i=>i._g=geom(i));
+  let top=0; const rows=[];
+  for(const d of DOMAINS){
+    const di=items.filter(i=>i.dom===d.id), open=STATE.open.has(d.id);
+    let h,lanes=1;
+    if(open){lanes=di.length?pack(di):1; h=Math.max(MIN_EXP_H,INPAD*2+lanes*laneH+(lanes-1)*laneGap);}
+    else h=COLLAPSED_H;
+    rows.push({d,di,open,top,h,lanes}); top+=h;
+  }
+  return {rows,total:top};
+}
+
+/* ============ render ============ */
+function render(){
+  const right=document.querySelector('.right');
+  rightW=Math.max(560,right.getBoundingClientRect().width);
+  yearW=(rightW-PADL-PADR)/(SPAN_END-BIRTH);
+  const L=buildLayout();
+  renderAxis(); renderCanvas(L); renderLeft(L);
+  if(STATE.selected) markSelected(STATE.selected);
+}
+
+function renderAxis(){
+  let s=`<svg width="${rightW}" height="${AXIS_H}" viewBox="0 0 ${rightW} ${AXIS_H}" role="img" aria-label="Time, in years and age">`;
+  for(let yr=1990;yr<=SPAN_END;yr+=10){const px=x(yr);
+    s+=`<text x="${px}" y="24" text-anchor="middle" font-family="var(--sans)" font-size="11" fill="${INK2}">${yr}</text>`;
+    s+=`<text x="${px}" y="38" text-anchor="middle" font-family="var(--sans)" font-size="9.5" fill="${FAINT}">age ${age(yr)}</text>`;}
+  const nx=x(NOW);
+  s+=`<line x1="${nx}" y1="6" x2="${nx}" y2="${AXIS_H}" stroke="${ACCENT}" stroke-width="1.5"/>`;
+  s+=`<text x="${nx+7}" y="16" font-family="var(--sans)" font-size="9.5" letter-spacing="1.4" fill="${ACCENT}">NOW · AGE 41</text>`;
+  s+='</svg>'; document.getElementById('axis').innerHTML=s;
+}
+
+function renderCanvas(L){
+  const W=rightW,H=L.total;
+  let s=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><defs>
+    <marker id="arw" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L5,3 L0,6 Z" fill="${INK2}"/></marker></defs>`;
+  for(let yr=1990;yr<=SPAN_END;yr+=10){const px=x(yr);s+=`<line x1="${px}" y1="0" x2="${px}" y2="${H}" stroke="${alpha(INK,0.05)}"/>`;}
+  const nx=x(NOW); s+=`<line x1="${nx}" y1="0" x2="${nx}" y2="${H}" stroke="${ACCENT}" stroke-width="1.2" stroke-dasharray="2 4" opacity="0.7"/>`;
+  for(const R of L.rows){
+    if(R.top>0) s+=`<line x1="0" y1="${R.top}" x2="${W}" y2="${R.top}" stroke="${alpha(INK,0.06)}"/>`;
+    if(R.open){for(const it of R.di) s+=renderExpanded(it,R);}
+    else {for(const it of R.di) s+=renderCollapsed(it,R);}
+  }
+  s+='</svg>'; document.getElementById('canvas').innerHTML=s;
+}
+
+function labelAnchor(startPx,label){
+  const w=label.length*6.8+28;
+  return (startPx+w>rightW-PADR) ? 'end' : 'start';
+}
+function sentGlyph(it){ if(!it.sentiment)return ''; const v=it.sentiment.v,g=v>0?'▲':v<0?'▼':'■';
+  return `<tspan dx="6" fill="${INK2}" font-size="10">${g}</tspan>`; }
+function provTspan(it){ return `<tspan dx="7" font-family="var(--sans)" font-size="8.5" letter-spacing="1.2" fill="${FAINT}">${PROVWORD[it.prov].toUpperCase()}</tspan>`; }
+function star(it){ return it.derived?`<tspan dx="0" fill="${ACCENT}">✦ </tspan>`:''; }
+
+function renderExpanded(it,R){
+  const g=it._g, laneTop=R.top+INPAD+it._lane*(laneH+laneGap), labelY=laneTop+LABEL_DY, cy=laneTop+CY_DY;
+  const acc=it.highlight, line=(it.prov==='inferred'), col=acc?ACCENT:INK;
+  let inner='';
+  // trace ghost
+  if(STATE.changedItems.has(it.id)&&STATE.prevPos[it.id]){
+    const p=STATE.prevPos[it.id];
+    if(it.kind==='phase'&&p.s!=null){const gx0=x(p.s),gx1=x(p.e);
+      inner+=`<line x1="${gx0}" y1="${cy}" x2="${gx1}" y2="${cy}" stroke="${alpha(INK,0.28)}" stroke-width="1.2" stroke-dasharray="2 3"/>`;
+      inner+=`<line x1="${(gx0+gx1)/2}" y1="${cy}" x2="${(g.coreL+g.coreR)/2}" y2="${cy}" stroke="${INK2}" stroke-width="1" marker-end="url(#arw)"/>`;}
+    else if(p.at!=null){const gx=x(p.at);
+      inner+=`<circle cx="${gx}" cy="${cy}" r="${MK}" fill="none" stroke="${alpha(INK,0.3)}" stroke-width="1.1" stroke-dasharray="2 2"/>`;
+      inner+=`<line x1="${gx}" y1="${cy}" x2="${g.cx}" y2="${cy}" stroke="${INK2}" stroke-width="1" marker-end="url(#arw)"/>`;}
+  }
+  if(it.kind==='phase'){
+    if(line){
+      inner+=`<line class="core" x1="${g.sE}" y1="${cy}" x2="${g.eE}" y2="${cy}" stroke="${col}" stroke-width="1.5" opacity="${acc?0.95:0.55}"/>`;
+      inner+=`<line x1="${g.sE}" y1="${cy-4}" x2="${g.sE}" y2="${cy+4}" stroke="${col}" stroke-width="1.5" opacity="${acc?0.95:0.55}"/>`;
+      inner+=`<line x1="${g.eE}" y1="${cy-4}" x2="${g.eE}" y2="${cy+4}" stroke="${col}" stroke-width="1.5" opacity="${acc?0.95:0.55}"/>`;
+      if(it.risk) inner+=`<text x="${g.sE}" y="${cy+15}" class="lbl" font-size="11" fill="${ACCENT}">strain risk</text>`;
+    } else {
+      const a=it.prov==='recorded'?0.82:0.30;
+      inner+=`<rect class="core" x="${g.coreL}" y="${cy-H_BAR/2}" width="${Math.max(2,g.coreR-g.coreL)}" height="${H_BAR}" rx="${H_BAR/2}" fill="${alpha(col,a)}"/>`;
+      if(it.risk) inner+=`<text x="${g.sE}" y="${cy+15}" class="lbl" font-size="11" fill="${ACCENT}">strain risk</text>`;
+    }
+    const anc=labelAnchor(g.sE,it.label), lx=anc==='end'?g.eE:g.sE;
+    inner+=`<text class="lbl" x="${lx}" y="${labelY}" text-anchor="${anc}">${star(it)}${esc(it.label)}${sentGlyph(it)}${provTspan(it)}</text>`;
+    inner+=`<rect class="hit" x="${g.coreL-3}" y="${laneTop+2}" width="${Math.max(8,g.coreR-g.coreL)+6}" height="${laneH-4}" rx="4" fill="transparent"/>`;
+  } else {
+    if(g.lox<g.cx-2||g.hix>g.cx+2){
+      inner+=`<line x1="${g.lox}" y1="${cy}" x2="${g.hix}" y2="${cy}" stroke="${alpha(INK,0.32)}" stroke-width="1"/>`;
+      inner+=`<line x1="${g.lox}" y1="${cy-3.5}" x2="${g.lox}" y2="${cy+3.5}" stroke="${alpha(INK,0.32)}" stroke-width="1"/>`;
+      inner+=`<line x1="${g.hix}" y1="${cy-3.5}" x2="${g.hix}" y2="${cy+3.5}" stroke="${alpha(INK,0.32)}" stroke-width="1"/>`;}
+    const open=it.prov==='inferred';
+    inner+=`<circle class="core" cx="${g.cx}" cy="${cy}" r="${MK}" fill="${open?PAPER:alpha(col,it.prov==='recorded'?0.85:0.5)}" stroke="${col}" stroke-width="1.4"/>`;
+    const anc=labelAnchor(g.cx,it.label), lx=anc==='end'?g.cx+MK:g.cx+MK+5;
+    inner+=`<text class="lbl" x="${lx}" y="${labelY}" text-anchor="${anc}">${star(it)}${esc(it.label)}${sentGlyph(it)}${provTspan(it)}</text>`;
+    inner+=`<rect class="hit" x="${g.cx-9}" y="${laneTop+2}" width="18" height="${laneH-4}" rx="4" fill="transparent"/>`;
+  }
+  return `<g class="item" data-id="${it.id}" tabindex="0" role="button" aria-label="${esc(it.label)}">${inner}</g>`;
+}
+
+function renderCollapsed(it,R){
+  const g=it._g, cy=R.top+COLLAPSED_H/2, acc=it.highlight, col=acc?ACCENT:INK;
+  if(it.kind==='phase'){
+    if(it.prov==='inferred') return `<g class="item" data-id="${it.id}"><line class="core" x1="${g.sE}" y1="${cy}" x2="${g.eE}" y2="${cy}" stroke="${col}" stroke-width="1.2" opacity="${acc?0.9:0.4}"/></g>`;
+    return `<g class="item" data-id="${it.id}"><rect class="core" x="${g.coreL}" y="${cy-3}" width="${Math.max(2,g.coreR-g.coreL)}" height="6" rx="3" fill="${alpha(col,it.prov==='recorded'?0.6:0.28)}"/></g>`;
+  }
+  return `<g class="item" data-id="${it.id}"><circle class="core" cx="${g.cx}" cy="${cy}" r="3" fill="${it.prov==='inferred'?PAPER:alpha(col,0.55)}" stroke="${col}" stroke-width="1"/></g>`;
+}
+
+/* ============ left column ============ */
+const SUMMARY={
+  self:'10 items · next: cardiovascular risk ~2040',
+  career:'6 items · role-shift, then retirement',
+  finances:'4 items · college costs, then drawdown',
+  partner:'5 items · 2 past relationships',
+  children:'6 items · both leave home ~2033–2036',
+  parents:'5 items · caregiving window ahead',
+};
+function renderLeft(L){
+  let h=`<div class="axis-spacer"><span>Domains</span><span class="acts"><button data-act="open">open all</button><span>·</span><button data-act="close">close all</button></span></div>`;
+  for(const R of L.rows){
+    const d=R.d, open=R.open, changed=STATE.changedDomains.has(d.id)&&!open;
+    const add=d.id==='partner'?'＋ Add past relationship':d.id==='self'?'＋ Add past event':'＋ Add detail';
+    h+=`<button class="dhead${changed?' changed flash':''}" data-dom="${d.id}" aria-expanded="${open}" style="height:${R.h}px">
+      <span class="nm"><span class="chev">${open?'–':'+'}</span>${d.label}</span>
+      <span class="sm">${esc(SUMMARY[d.id])}</span>
+      <span class="upd">updated</span>
+      ${open?`<span class="addbtn" data-add="${d.id}" role="button" tabindex="0">${add}</span>`:''}
+    </button>`;
+  }
+  document.getElementById('leftcol').innerHTML=h;
+}
+function markSelected(id){
+  document.querySelectorAll('.item.sel').forEach(e=>e.classList.remove('sel'));
+  const g=document.querySelector(`.item[data-id="${id}"]`); if(g) g.classList.add('sel');
+}
+
+/* ============ detail ============ */
+function fmtYear(p){return p.lo===p.hi?`${p.est}`:`${p.est} <span style="color:${FAINT}">(${p.lo}–${p.hi})</span>`;}
+function select(id){
+  STATE.selected=id; markSelected(id);
+  const it=BYID[id],d=DOM[it.dom];
+  let when;
+  if(it.kind==='event') when=`≈ ${fmtYear(it.at)} · age ${age(it.at.est)}`;
+  else when=`${it.s.est}–${it.e.est} · ~${it.e.est-it.s.est} yrs · age ${age(it.s.est)}–${age(it.e.est)}`;
+  const cp=Math.round(it.conf*100);
+  let h='';
+  h+=`<div class="dom">${d.label}${it.historical?' · deep-dive history':''}</div>`;
+  h+=`<h3>${it.derived?'<span class="a">✦ </span>':''}${esc(it.label)}</h3>`;
+  h+=`<div class="when">${when}</div>`;
+  h+=`<div class="prov">${PROVWORD[it.prov]}`;
+  if(it.sentiment){const v=it.sentiment.v,g=v>0?'▲':v<0?'▼':'■'; h+=`<span class="sent"> &nbsp; ${g} felt: ${esc(it.sentiment.label)}</span>`;}
+  h+=`</div>`;
+  h+=`<div class="kv"><div class="k">Confidence</div><div class="v">${cp}%</div><div class="meter"><i style="width:${cp}%"></i></div></div>`;
+  h+=`<div class="kv"><div class="k">Basis</div><div class="v">${esc(it.basis)}</div></div>`;
+  h+=`<div class="kv"><div class="k">Source · captured</div><div class="v">${esc(it.source)} · ${it.addedBy}</div></div>`;
+  if(it.dispo){
+    h+=`<div class="block"><div class="k">Disposition influence</div><div class="v">Shaped by caregiving propensity = <b>${STATE.prop}</b>.`;
+    if(STATE.changedItems.has(id)&&STATE.prevPos[id]){const p=STATE.prevPos[id];
+      const before=p.at!=null?`${p.at}`:`${p.s}–${p.e}`, after=it.kind==='event'?`${it.at.est}`:`${it.s.est}–${it.e.est}`;
+      h+=` Moved <b>${before} → ${after}</b>.`;}
+    h+=`</div></div>`;
+  }
+  if(it.derived){const names=it.derived.map(x=>BYID[x]?BYID[x].label:x).join(', ');
+    h+=`<div class="block q"><div class="k">✦ Derived from</div><div class="v">${esc(names)}</div></div>`;}
+  if(it.affects){const names=it.affects.map(x=>BYID[x]?BYID[x].label:x).join(', ');
+    h+=`<div class="block q"><div class="k">Affects</div><div class="v">${esc(names)}</div></div>`;}
+  h+=`<button class="adjust">Adjust this assumption</button>`;
+  h+=`<div class="note">Adjusting a fact or rejecting an estimate re-flows everything derived from it. (Mockup — not wired.)</div>`;
+  document.getElementById('detail').innerHTML=h;
+}
+function showAddInfo(domId){
+  const isP=domId==='partner';
+  document.getElementById('detail').innerHTML=
+    `<div class="dom">Deep-dive capture</div><h3>${isP?'Add past relationship':'Add past event'}</h3>
+     <div class="kv"><div class="v">Onboarding stays light. On a deeper pass you add what wasn't asked — ${isP?'past relationships, with start, end, and how they ended':'past events like a broken thumb or a recovered illness'} — plus a sentiment. More history sharpens the projections and the disposition read.</div></div>
+     <div class="note">Placeholder — capture isn't wired in this mockup.</div>`;
+}
+
+/* ============ interaction ============ */
+function toggleDomain(id){
+  if(STATE.open.has(id)) STATE.open.delete(id);
+  else { if(!STATE.multi) STATE.open.clear(); STATE.open.add(id); STATE.changedDomains.delete(id); }
+  render();
+}
+function setProp(p){
+  if(p===STATE.prop) return;
+  STATE.prevPos={}; STATE.changedItems.clear(); STATE.changedDomains.clear();
+  const before=snapshot();
+  STATE.prevPos.caregiving={s:before.cgS,e:before.cgE};
+  STATE.prevPos.pdecline={s:before.cgS,e:BYID.pdecline.e.est};
+  STATE.prevPos.plateau={at:before.plat};
+  STATE.prop=p; applyProjection(p);
+  const after=snapshot();
+  const chk=(id,ch)=>{if(ch){STATE.changedItems.add(id);STATE.changedDomains.add(BYID[id].dom);}else delete STATE.prevPos[id];};
+  chk('caregiving',before.cgS!==after.cgS||before.cgE!==after.cgE);
+  chk('pdecline',before.cgS!==after.cgS);
+  chk('plateau',before.plat!==after.plat);
+  if(before.risk!==after.risk){STATE.changedItems.add('emptypartner');STATE.changedDomains.add('partner');STATE.prevPos.emptypartner={s:BYID.emptypartner.s.est,e:BYID.emptypartner.e.est};}
+  document.querySelectorAll('.opts button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.p===p));
+  document.getElementById('dispTilt').textContent=DISP_TILT[p];
+  render();
+}
+
+document.getElementById('leftcol').addEventListener('click',e=>{
+  const act=e.target.closest('[data-act]'); if(act){ if(act.dataset.act==='open'){STATE.multi=true;STATE.open=new Set(DOMAINS.map(d=>d.id));}else{STATE.multi=false;STATE.open.clear();} render(); return; }
+  const add=e.target.closest('[data-add]'); if(add){e.stopPropagation();showAddInfo(add.dataset.add);return;}
+  const head=e.target.closest('.dhead'); if(head) toggleDomain(head.dataset.dom);
+});
+document.getElementById('leftcol').addEventListener('keydown',e=>{
+  if(e.target.matches('[data-add]')&&(e.key==='Enter'||e.key===' ')){e.preventDefault();e.stopPropagation();showAddInfo(e.target.dataset.add);}
+});
+document.getElementById('canvas').addEventListener('click',e=>{const g=e.target.closest('[data-id]');if(g)select(g.dataset.id);});
+document.getElementById('canvas').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const g=e.target.closest('[data-id]');if(g){e.preventDefault();select(g.dataset.id);}}});
+document.querySelectorAll('.opts button').forEach(b=>b.addEventListener('click',()=>setProp(b.dataset.p)));
+let rz; window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(render,120);});
+
+/* ============ WCAG self-check ============ */
+function _lum(hex){const c=hex.replace('#','');const v=i=>parseInt(c.substr(i,2),16)/255;const f=x=>x<=0.03928?x/12.92:Math.pow((x+0.055)/1.055,2.4);return 0.2126*f(v(0))+0.7152*f(v(2))+0.0722*f(v(4));}
+function _cr(a,b){const L1=_lum(a),L2=_lum(b),hi=Math.max(L1,L2),lo=Math.min(L1,L2);return Math.round((hi+0.05)/(lo+0.05)*100)/100;}
+window.wcagReport=()=>{
+  const out=[
+    ['ink on paper',_cr(INK,PAPER),4.5],
+    ['ink2 on paper',_cr(INK2,PAPER),4.5],
+    ['faint on paper (text)',_cr(FAINT,PAPER),4.5],
+    ['accent on paper',_cr(ACCENT,PAPER),4.5],
+    ['now line vs paper (graphic)',_cr(ACCENT,PAPER),3],
+    ['ink on paper2',_cr(INK,'#fcfaf5'),4.5],
+    ['ink2 on paper2',_cr(INK2,'#fcfaf5'),4.5],
+  ];
+  const fails=out.filter(([n,r,min])=>r<min);
+  return {pass:fails.length===0,fails,all:out};
+};
+render();
+</script>
+</body>
+</html>
