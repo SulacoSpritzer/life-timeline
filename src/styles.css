@@ -132,3 +132,16 @@ svg{display:block}
 /* deep-dive inline add form (in detail panel) */
 .addform .ob-field{margin:12px 0}
 .addform .ob-input, .addform .ob-select{max-width:100%}
+
+/* hover tooltip: bullet breakdown of an item */
+.tip{position:fixed; z-index:60; max-width:308px; background:#fffdf8; border:1px solid var(--hair); border-radius:10px;
+  padding:13px 16px 14px; box-shadow:0 14px 38px rgba(33,30,25,.20); pointer-events:none; opacity:0; transform:translateY(4px);
+  transition:opacity .15s ease, transform .15s ease}
+.tip.show{opacity:1; transform:none}
+@media (prefers-reduced-motion: reduce){.tip{transition:none}}
+.tip-h{font-family:var(--serif); font-size:15.5px; font-weight:600; color:var(--ink); letter-spacing:-.01em; line-height:1.25; margin-bottom:9px}
+.tip-h .a{color:var(--accent)}
+.tip ul{margin:0; padding:0; list-style:none}
+.tip li{position:relative; padding-left:15px; margin:5px 0; font-family:var(--sans); font-size:12px; line-height:1.5; color:var(--ink2)}
+.tip li::before{content:"•"; position:absolute; left:2px; color:var(--accent)}
+.tip li b{color:var(--ink); font-weight:600}

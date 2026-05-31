@@ -31,6 +31,7 @@ export function mountTimeline(root, { profile, onEdit }) {
   root.innerHTML = shell(profile);
   const $ = (s) => root.querySelector(s);
   const domainsEl = $('#tl-domains');
+  let tipEl = null, hoverId = null, hoverTimer = null;
 
   // Build the per-domain row skeleton once; paint() updates contents in place so the
   // height CSS transition has stable elements to animate.
@@ -59,6 +60,7 @@ export function mountTimeline(root, { profile, onEdit }) {
 
   /* ---------- paint ---------- */
   function paint() {
+    hideTip();
     state.byId = Object.fromEntries(state.items.map((i) => [i.id, i]));
     trackW = Math.max(420, $('#tl-axis').getBoundingClientRect().width);
     yearW = (trackW - PADL - PADR) / (state.span.end - state.span.start);
@@ -250,6 +252,49 @@ export function mountTimeline(root, { profile, onEdit }) {
     state.reveal = wasOpen ? new Set() : new Set([id]);
     animate(() => paint());
   }
+
+  /* ---------- hover tooltip: bullet breakdown ---------- */
+  tipEl = document.getElementById('tl-tip');
+  if (!tipEl) { tipEl = document.createElement('div'); tipEl.id = 'tl-tip'; tipEl.className = 'tip'; document.body.appendChild(tipEl); }
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  const names = (ids) => ids.map((x) => state.byId[x]?.label || x).join(', ');
+  function tipHTML(it) {
+    const when = it.kind === 'event'
+      ? `≈ ${it.at.lo === it.at.hi ? it.at.est : `${it.at.est} (${it.at.lo}–${it.at.hi})`} · age ${age(it.at.est)}`
+      : `${it.s.est}–${it.e.est} · ~${it.e.est - it.s.est} yrs · age ${age(it.s.est)}–${age(it.e.est)}`;
+    const li = [esc(when), `<b>${cap(PROVWORD[it.prov])}</b> · ${Math.round(it.conf * 100)}% confidence`, esc(it.basis)];
+    if (it.derived && it.derived.length) li.push(`<b>Derived from</b> ${esc(names(it.derived))}`);
+    if (it.affects && it.affects.length) li.push(`<b>Affects</b> ${esc(names(it.affects))}`);
+    if (it.sentiment) li.push(`<b>Felt</b> ${esc(it.sentiment.label)}`);
+    li.push(`<b>Source</b> ${esc(it.source)}`);
+    return `<div class="tip-h">${it.derived && it.derived.length ? '<span class="a">✦ </span>' : ''}${esc(it.label)}</div><ul>${li.map((b) => `<li>${b}</li>`).join('')}</ul>`;
+  }
+  function showTip(g) {
+    const it = state.byId[g.dataset.id]; if (!it) return;
+    tipEl.innerHTML = tipHTML(it);
+    const core = g.querySelector('.core') || g, r = core.getBoundingClientRect(), tr = tipEl.getBoundingClientRect();
+    let left = Math.max(10, Math.min(r.left + r.width / 2 - tr.width / 2, window.innerWidth - tr.width - 10));
+    // Below the mark by default (labels sit above the bar); flip above if it would overflow.
+    let top = r.bottom + 12;
+    if (top + tr.height > window.innerHeight - 10) top = Math.max(10, r.top - tr.height - 12);
+    tipEl.style.left = Math.round(left) + 'px'; tipEl.style.top = Math.round(top) + 'px';
+    tipEl.classList.add('show');
+  }
+  function hideTip() { if (tipEl) tipEl.classList.remove('show'); hoverId = null; clearTimeout(hoverTimer); }
+  domainsEl.addEventListener('mouseover', (e) => {
+    const g = e.target.closest('[data-id]'); if (!g || g.dataset.id === hoverId) return;
+    hoverId = g.dataset.id; clearTimeout(hoverTimer);
+    hoverTimer = setTimeout(() => { const cur = domainsEl.querySelector(`[data-id="${hoverId}"]`); if (cur) showTip(cur); }, 130);
+  });
+  domainsEl.addEventListener('mouseout', (e) => {
+    const g = e.target.closest('[data-id]'); if (!g) return;
+    if (e.relatedTarget && g.contains(e.relatedTarget)) return;
+    if (e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('[data-id]') === g) return;
+    hideTip();
+  });
+  domainsEl.addEventListener('focusin', (e) => { const g = e.target.closest('[data-id]'); if (g) { hoverId = g.dataset.id; showTip(g); } });
+  domainsEl.addEventListener('focusout', () => hideTip());
+  window.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideTip(); });
 
   $('#tl-domains').addEventListener('click', (e) => {
     const add = e.target.closest('[data-add]'); if (add) { e.stopPropagation(); showAddForm(add.dataset.add); return; }
