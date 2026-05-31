@@ -286,6 +286,65 @@ export const RESEARCHED_FACTS = [
     ]
   },
   {
+    "id": "children.spacing",
+    "domain": "children",
+    "topic": "Spacing between children (interpregnancy interval)",
+    "kind": "distribution",
+    "statement": "In the US the median interpregnancy interval (birth to next conception) is 29 months from birth-certificate data (27 months in NSFG), roughly 2.5 years, which adds ~9 months of gestation to give birth-to-birth spacing of about 3 years (~38 months); it ranges by race/ethnicity (non-Hispanic white 26, non-Hispanic black 30, Hispanic 34 months), by mother's age (11-14 months under 20 up to 39-76 months at 40+), and by state (25 months in ID/MT/ND/SD/UT/WI to 32 months in CA), with ~30% of intervals under 18 months, ~50% at 18-59 months, and ~21% at 60+ months.",
+    "metric": {
+      "medianIPIMonths": 29,
+      "medianIPIMonthsNSFG": 27,
+      "medianBirthToBirthMonths": 38,
+      "gestationMonths": 9,
+      "byRaceEthnicityMonths": {
+        "nonHispanicWhite": 26,
+        "nonHispanicBlack": 30,
+        "hispanic": 34
+      },
+      "byMotherAgeMonths": {
+        "under20": 12,
+        "age40plusLow": 39,
+        "age40plusHigh": 76
+      },
+      "byStateMonths": {
+        "low": 25,
+        "high": 32
+      },
+      "distributionBirthCertificate": {
+        "under18mo": 0.3,
+        "from18to59mo": 0.5,
+        "over60mo": 0.21
+      },
+      "distributionNSFG": {
+        "under18mo": 0.29,
+        "from18to59mo": 0.52,
+        "over60mo": 0.18
+      }
+    },
+    "conditioning": {
+      "country": "US",
+      "source": "2011 birth certificates; 2006-2010 NSFG",
+      "definition": "interpregnancy interval = birth to next conception"
+    },
+    "provenance": "data",
+    "confidence": 0.95,
+    "source": {
+      "org": "CDC / National Center for Health Statistics (NCHS)",
+      "title": "Interpregnancy Intervals in the United States: Data From the Birth Certificate and the National Survey of Family Growth (National Vital Statistics Reports, Vol. 64, No. 3)",
+      "year": 2015,
+      "url": "https://www.cdc.gov/nchs/data/nvsr/nvsr64/nvsr64_03.pdf"
+    },
+    "note": "All brief figures confirmed verbatim against the primary CDC/NCHS source. Refinement: exact overall median IPI is 29 months from the birth certificate (not \"28-29\"); NSFG gives 27 months. The birth-to-birth conversion (~3 years / ~38 months) is an inferred/derived step (IPI + ~9 months gestation), not directly quoted from the report.",
+    "tags": [
+      "interpregnancy interval",
+      "child spacing",
+      "fertility",
+      "CDC",
+      "NCHS",
+      "birth interval"
+    ]
+  },
+  {
     "id": "finance.debt-arc",
     "domain": "finances",
     "topic": "Household debt by age",
@@ -360,6 +419,84 @@ export const RESEARCHED_FACTS = [
     ]
   },
   {
+    "id": "finance.networth-age",
+    "domain": "finances",
+    "topic": "Median household net worth by age of head",
+    "kind": "distribution",
+    "statement": "U.S. median household net worth rises with age from $39,000 for heads under 35 to a peak of $409,900 at ages 65-74, then declines to $335,600 at age 75+ (2022 Survey of Consumer Finances).",
+    "metric": {
+      "peakAge": "65-74",
+      "peakValue": 409900,
+      "byAge": {
+        "under35": 39000,
+        "35-44": 135600,
+        "45-54": 247200,
+        "55-64": 364500,
+        "65-74": 409900,
+        "75plus": 335600
+      },
+      "unit": "USD",
+      "measure": "median"
+    },
+    "provenance": "data",
+    "confidence": 0.97,
+    "source": {
+      "org": "Board of Governors of the Federal Reserve System",
+      "title": "Changes in U.S. Family Finances from 2019 to 2022: Evidence from the Survey of Consumer Finances",
+      "year": 2023,
+      "url": "https://www.federalreserve.gov/publications/files/scf23.pdf"
+    },
+    "note": "2022 SCF data. All six bracket figures verified to the exact dollar via Fidelity's table (sourced to the Fed's Oct 2023 SCF report); peak bracket (65-74, $409,900) and rise-then-decline shape independently corroborated by NerdWallet and Fed materials. The $409,900 figure is exact, not rounded; \"$410,000\" is a secondary-reporter rounding. Relayed by Fidelity (https://www.fidelity.com/learning-center/smart-money/average-net-worth-by-age) and NerdWallet (https://www.nerdwallet.com/finance/learn/average-net-worth-by-age). SCF index: https://www.federalreserve.gov/econres/scfindex.htm",
+    "tags": [
+      "net worth",
+      "age",
+      "SCF",
+      "Federal Reserve",
+      "median",
+      "household finances"
+    ]
+  },
+  {
+    "id": "finance.retirement-savings",
+    "domain": "finances",
+    "topic": "U.S. retirement savings balances and participation",
+    "kind": "distribution",
+    "statement": "Among U.S. families that hold a retirement account, the 2022 SCF median balance is ~$86,900 (only 54.3% of families have any account, so ~46% have $0), with holder-only medians rising by age (under-35 ~$18,800, 35-44 ~$45,000, 45-54 ~$119,000, 55-64 ~$185,000-$204,000), while Vanguard's year-end-2024 401(k) data show a $38,176 median and $148,153 average balance.",
+    "metric": {
+      "medianBalanceAllAgesHolders": 86900,
+      "participationRate": 0.543,
+      "noAccountShare": 0.457,
+      "medianBalanceByAge": {
+        "under35": 18800,
+        "35to44": 45000,
+        "45to54": 119000,
+        "55to64": 185000
+      },
+      "medianBalanceByAgeHigh": {
+        "55to64": 204000
+      },
+      "vanguard401kMedian": 38176,
+      "vanguard401kAverage": 148153,
+      "peakAgeBand": "65to74"
+    },
+    "conditioning": {
+      "definition": "by-age figures are holder-only medians (exclude the ~46% of families with $0), not whole-population medians",
+      "scfYear": 2022,
+      "vanguardDataYear": 2024,
+      "ageBandSource": "CRR brief and underlying SCF, not CRS IF12928",
+      "subpopulationNote": "55-64 ranges $185k-$204k depending on subpopulation; CRR's $204k is for working households with a 401(k)"
+    },
+    "provenance": "data",
+    "confidence": 0.85,
+    "source": {
+      "org": "Federal Reserve Board / Center for Retirement Research at Boston College / Vanguard",
+      "title": "Changes in U.S. Family Finances from 2019 to 2022 (SCF 2022); 401(k)/IRA Holdings in 2022 (CRR); How America Saves 2025 (Vanguard)",
+      "year": 2025,
+      "url": "https://www.federalreserve.gov/publications/files/scf23.pdf"
+    },
+    "note": "Confirmed with corrections: (1) CITATION FIX — CRS IF12928 confirms only the 54.3% participation rate and distribution buckets; it does NOT contain by-age median balances. Cite CRR (\"401(k)/IRA Holdings in 2022,\" https://crr.bc.edu/401k-ira-holdings-in-2022-an-update-from-the-scf/) and the underlying SCF (https://www.federalreserve.gov/publications/files/scf23.pdf) for the age-band medians, not CRS. (2) NUMBER FIX — 45-54 holder median is $119,000 (CRR), not the ~$115,000 some sources cite; 55-64 is ~$185k-$204k depending on subpopulation ($204k = CRR working households with a 401(k)). (3) DEFINITION CAVEAT — the by-age figures here are holder-only medians; much lower figures seen elsewhere (e.g., dqydj under-35 ~$4,700, all-ages ~$13,000) are whole-population medians that count the ~46% with $0 and must not be conflated. Headline anchors ($86,900 SCF holder median, 54.3% participation; Vanguard $38,176 median / $148,153 average) are robustly confirmed. Vanguard source: https://corporate.vanguard.com/content/dam/corp/research/pdf/how_america_saves_report_2025.pdf"
+  },
+  {
     "id": "parents.caregiving-duration",
     "domain": "parents",
     "topic": "Duration of family caregiving for an aging parent/adult",
@@ -388,6 +525,44 @@ export const RESEARCHED_FACTS = [
       "url": "https://www.aarp.org/content/dam/aarp/ppi/topics/ltss/family-caregiving/caregiving-in-us-2025.doi.10.26419-2fppi.00373.001.pdf"
     },
     "note": "The 5.5-year mean is for adult care recipients generally (ages 18+, n=6,549), not a parent-only subset; the report publishes no parent-only duration figure and no sex/education stratification for duration. Self-reported survey, not a federal statistic. The original finding's \"50.6 years for caregivers of adults\" sub-claim was NOT found in the source and is dropped as unverified; the report states average caregiver age is 51. The \"27 hours/week\" prose value corresponds to 27.3 hours in Figure 15."
+  },
+  {
+    "id": "parents.caregiving-prevalence",
+    "domain": "parents",
+    "topic": "Prevalence and profile of US unpaid family caregivers",
+    "kind": "distribution",
+    "statement": "In 2020, 21.3% of US adults (more than 1 in 5, roughly 53.0 million people, up from 43.5 million in 2015) were unpaid family caregivers in the prior 12 months, with an average caregiver age of 49.4 years and about 61% being women.",
+    "metric": {
+      "prevalencePct": 21.3,
+      "caregiversMillions2020": 53,
+      "caregiversMillions2015": 43.5,
+      "increaseMillions": 9.5,
+      "averageAge": 49.4,
+      "womenPct": 61,
+      "adultCareOnlyPrevalencePct": 19
+    },
+    "conditioning": {
+      "country": "US",
+      "year": 2020,
+      "scope": "unpaid family caregivers of any adult or child with special needs in prior 12 months",
+      "narrowerScopeNote": "19% figure refers specifically to caregivers of an adult"
+    },
+    "provenance": "data",
+    "confidence": 0.98,
+    "source": {
+      "org": "National Alliance for Caregiving and AARP",
+      "title": "Caregiving in the U.S. 2020",
+      "year": 2020,
+      "url": "https://www.aarp.org/pri/topics/ltss/family-caregiving/caregiving-in-the-united-states/"
+    },
+    "note": "Confirmed by two independent searches plus a direct fetch of the AARP PRI landing page; 21.3%/53.0M verified against the AARP primary source, and the 49.4-year average age and 61% women confirmed via a second search quoting the report directly. The headline 21.3%/53.0M counts caregivers of any adult or child with special needs; a narrower ~19% (~1 in 5) refers specifically to those caring for an adult. A newer Caregiving in the U.S. 2025 edition exists, but the 2020 edition is the correct source here. Full report PDF: https://www.caregiving.org/wp-content/uploads/2021/01/full-report-caregiving-in-the-united-states-01-21.pdf",
+    "tags": [
+      "caregiving",
+      "family",
+      "aging",
+      "demographics",
+      "unpaid-care"
+    ]
   },
   {
     "id": "parents.eldercare-onset",

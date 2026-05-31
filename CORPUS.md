@@ -36,7 +36,8 @@ Query helpers: `getFact(id)`, `factsForDomain(domain)`, `factsByTag(tag)`, `cite
 
 ## Coverage
 
-**~42 cited facts** across all six domains, in two layers:
+**46 cited facts** across all six domains (self 21, career 6, children 6, partner 5, finances 4,
+parents 4), in two layers:
 
 - **Seed** ([`corpus.js`](src/corpus/corpus.js)) — 14 hand-curated anchors (life table, smoking,
   education, muscle, menopause, cognition, peak earnings, retirement, first birth, leaving home…).
