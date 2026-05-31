@@ -22,7 +22,7 @@ export function mountTimeline(root, { profile, onEdit }) {
     profile, disp: disp0,
     items: run(profile, { disposition: disp0 }),
     byId: {}, span: spanOf(profile),
-    open: new Set(['self']), multi: false, selected: null,
+    open: new Set(['self']), multi: false, selected: null, firstPaint: true,
     changedItems: new Set(), changedDomains: new Set(), prevPos: {},
   };
   let rightW = 1000, yearW = 10;
@@ -72,6 +72,16 @@ export function mountTimeline(root, { profile, onEdit }) {
     const L = buildLayout();
     renderAxis(); renderCanvas(L); renderLeft(L);
     if (state.selected && state.byId[state.selected]) markSelected(state.selected);
+    state.firstPaint = false; // unfold reveal only on first appearance
+  }
+
+  // Stagger each item's reveal by where it sits in time — a left-to-right unfolding.
+  function unfoldAttrs(it) {
+    if (!state.firstPaint) return { cls: '', style: '' };
+    const t = it.kind === 'event' ? it.at.est : it.s.est;
+    const span = state.span.end - state.span.start;
+    const norm = span > 0 ? Math.max(0, Math.min(1, (t - state.span.start) / span)) : 0;
+    return { cls: ' unfold', style: ` style="--d:${(norm * 1.25).toFixed(2)}s"` };
   }
 
   function renderAxis() {
@@ -109,6 +119,7 @@ export function mountTimeline(root, { profile, onEdit }) {
   function renderExpanded(it, R) {
     const g = it._g, laneTop = R.top + INPAD + it._lane * (laneH + laneGap), labelY = laneTop + LABEL_DY, cy = laneTop + CY_DY;
     const acc = it.highlight, line = it.prov === 'inferred', col = acc ? ACCENT : INK;
+    const ua = unfoldAttrs(it);
     let inner = '';
     if (state.changedItems.has(it.id) && state.prevPos[it.id]) {
       const p = state.prevPos[it.id];
@@ -146,15 +157,16 @@ export function mountTimeline(root, { profile, onEdit }) {
       inner += `<text class="lbl" x="${lx}" y="${labelY}" text-anchor="${anc}">${star(it)}${esc(it.label)}${sentGlyph(it)}${provTspan(it)}</text>`;
       inner += `<rect class="hit" x="${g.cx - 9}" y="${laneTop + 2}" width="18" height="${laneH - 4}" rx="4" fill="transparent"/>`;
     }
-    return `<g class="item" data-id="${it.id}" tabindex="0" role="button" aria-label="${esc(it.label)}">${inner}</g>`;
+    return `<g class="item${ua.cls}" data-id="${it.id}" tabindex="0" role="button" aria-label="${esc(it.label)}"${ua.style}>${inner}</g>`;
   }
   function renderCollapsed(it, R) {
     const g = it._g, cy = R.top + COLLAPSED_H / 2, acc = it.highlight, col = acc ? ACCENT : INK;
+    const ua = unfoldAttrs(it);
     if (it.kind === 'phase') {
-      if (it.prov === 'inferred') return `<g class="item" data-id="${it.id}"><line class="core" x1="${g.sE}" y1="${cy}" x2="${g.eE}" y2="${cy}" stroke="${col}" stroke-width="1.2" opacity="${acc ? 0.9 : 0.4}"/></g>`;
-      return `<g class="item" data-id="${it.id}"><rect class="core" x="${g.coreL}" y="${cy - 3}" width="${Math.max(2, g.coreR - g.coreL)}" height="6" rx="3" fill="${alpha(col, it.prov === 'recorded' ? 0.6 : 0.28)}"/></g>`;
+      if (it.prov === 'inferred') return `<g class="item${ua.cls}" data-id="${it.id}"${ua.style}><line class="core" x1="${g.sE}" y1="${cy}" x2="${g.eE}" y2="${cy}" stroke="${col}" stroke-width="1.2" opacity="${acc ? 0.9 : 0.4}"/></g>`;
+      return `<g class="item${ua.cls}" data-id="${it.id}"${ua.style}><rect class="core" x="${g.coreL}" y="${cy - 3}" width="${Math.max(2, g.coreR - g.coreL)}" height="6" rx="3" fill="${alpha(col, it.prov === 'recorded' ? 0.6 : 0.28)}"/></g>`;
     }
-    return `<g class="item" data-id="${it.id}"><circle class="core" cx="${g.cx}" cy="${cy}" r="3" fill="${it.prov === 'inferred' ? PAPER : alpha(col, 0.55)}" stroke="${col}" stroke-width="1"/></g>`;
+    return `<g class="item${ua.cls}" data-id="${it.id}"${ua.style}><circle class="core" cx="${g.cx}" cy="${cy}" r="3" fill="${it.prov === 'inferred' ? PAPER : alpha(col, 0.55)}" stroke="${col}" stroke-width="1"/></g>`;
   }
 
   function domainSummary(domId) {
