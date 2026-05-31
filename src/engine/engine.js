@@ -3,7 +3,7 @@
 // Hybrid by design: where we have a data table we use it; otherwise we infer and say so.
 
 import { NOW, pt, clampYear } from '../model.js';
-import { deathYearEst } from '../data/lifeTables.js';
+import { deathYearEst, lifeExpectancyDelta } from '../data/lifeTables.js';
 import {
   CVD_ONSET_AGE, RETIREMENT_AGE, RETIRE_BY_PROFESSION, LEAVE_HOME_AGE, COLLEGE_AGE,
   PEAK_EARNING_AGE, CAREGIVING_SPAN, SOURCES,
@@ -15,8 +15,11 @@ const S = (v, label) => ({ v, label });
 export function computeFacts(p, disp, now = NOW) {
   const f = { birth: p.birthYear, age: now - p.birthYear };
 
-  // Self
-  f.death = deathYearEst(p.birthYear, p.sex, now);
+  // Self — life expectancy from the SSA table, adjusted by the profile's risk factors.
+  const le = lifeExpectancyDelta(p);
+  const base = deathYearEst(p.birthYear, p.sex, now, 0);
+  f.death = le.years ? deathYearEst(p.birthYear, p.sex, now, le.years) : base;
+  f.le = le; f.baseDeathAge = base.deathAge;
   f.eduEnd = p.birthYear + (p.education === 'graduate' ? 24 : p.education === 'college' ? 22 : 18);
   f.peakHealthEnd = p.birthYear + 40;
   f.cvdYear = p.birthYear + (CVD_ONSET_AGE[p.sex] ?? CVD_ONSET_AGE.other);
@@ -79,9 +82,11 @@ function selfGen(ctx) {
   add(ctx, { id: 'peakhealth', dom: 'self', kind: 'phase', label: 'Peak physical health', s: pt(f.eduEnd - 4), e: pt(f.peakHealthEnd, f.peakHealthEnd - 2, f.peakHealthEnd + 4), prov: 'data', conf: 0.8, basis: 'Physiological performance peaks in the 20s–30s, then eases.', source: 'Exercise-physiology norms' });
   add(ctx, { id: 'decline', dom: 'self', kind: 'phase', label: 'Gradual physiological decline', s: pt(f.peakHealthEnd, f.peakHealthEnd - 2, f.peakHealthEnd + 4), e: pt(f.illnessStart), prov: 'inferred', conf: 0.55, basis: 'Inferred continuation of age-related decline; not individualized.', source: SOURCES.heuristic });
   if (future(ctx, f.cvdYear))
-    add(ctx, { id: 'cvd', dom: 'self', kind: 'event', label: 'Cardiovascular risk rises', at: pt(f.cvdYear, f.cvdYear - 4, f.cvdYear + 6), prov: 'data', conf: 0.7, basis: `Age-stratified cardiovascular incidence climbs from the ${p.sex === 'female' ? 'early 60s' : 'mid-50s'}.`, source: SOURCES.cvd });
-  add(ctx, { id: 'illness', dom: 'self', kind: 'phase', label: 'Age-linked illness risk', s: pt(f.illnessStart, f.illnessStart - 4, f.illnessStart + 3), e: pt(f.death.est), prov: 'data', conf: 0.6, basis: 'Age-specific morbidity curves.', source: 'Population morbidity data' });
-  add(ctx, { id: 'death', dom: 'self', kind: 'event', label: 'Life expectancy (est.)', at: f.death, prov: 'data', conf: 0.6, basis: `Period life table for a ${p.sex} aged ${f.age}, conditioned on current age.`, source: SOURCES.lifeTable });
+    add(ctx, { id: 'cvd', dom: 'self', kind: 'event', label: 'Cardiovascular risk climbs', at: pt(f.cvdYear, f.cvdYear - 4, f.cvdYear + 6), prov: 'data', conf: 0.7, basis: `Cardiovascular risk climbs through the decade before the average first event (≈65 for men, ≈72 for women).`, source: SOURCES.cvd });
+  add(ctx, { id: 'illness', dom: 'self', kind: 'phase', label: 'Age-linked illness risk', s: pt(f.illnessStart, f.illnessStart - 4, f.illnessStart + 3), e: pt(f.death.est), prov: 'data', conf: 0.6, basis: 'Age-specific morbidity curves.', source: SOURCES.morbidity });
+  const adj = f.le.factors.length ? ` Adjusted ${f.le.factors.map((x) => `${x.delta > 0 ? '+' : ''}${x.delta} yr (${x.label})`).join(', ')} → age ${f.death.deathAge}.` : '';
+  const deathSrc = f.le.factors.length ? `${SOURCES.lifeTable}; ${[...new Set(f.le.factors.map((x) => x.source))].join('; ')}` : SOURCES.lifeTable;
+  add(ctx, { id: 'death', dom: 'self', kind: 'event', label: 'Life expectancy (est.)', at: f.death, prov: 'data', conf: 0.6, basis: `${SOURCES.lifeTable} for a ${p.sex} aged ${f.age}: about age ${f.baseDeathAge}.${adj}`, source: deathSrc });
   // deep-dive past events
   (p.pastEvents || []).forEach((ev, i) => add(ctx, {
     id: `selfpast${i}`, dom: 'self', kind: ev.kind === 'phase' ? 'phase' : 'event', label: ev.label,
@@ -96,10 +101,10 @@ function careerGen(ctx) {
   const { p, f } = ctx;
   add(ctx, { id: 'work', dom: 'career', kind: 'event', label: 'Enters workforce', at: pt(f.eduEnd), prov: 'recorded', conf: 1, basis: 'Education end plus typical entry age.', source: SOURCES.profile });
   add(ctx, { id: 'early', dom: 'career', kind: 'phase', label: 'Early career', s: pt(f.eduEnd), e: pt(f.eduEnd + 10), prov: 'recorded', conf: 1, basis: 'Observed history.', source: SOURCES.profile });
-  add(ctx, { id: 'peakearn', dom: 'career', kind: 'phase', label: 'Peak earning years', s: pt(f.peakEarn.s, f.peakEarn.s - 2, f.peakEarn.s + 2), e: pt(f.peakEarn.e, f.peakEarn.e - 3, f.peakEarn.e + 5), prov: 'data', conf: 0.72, basis: 'Earnings-by-age curve for your field peaks ~45–60.', source: SOURCES.income });
+  add(ctx, { id: 'peakearn', dom: 'career', kind: 'phase', label: 'Peak earning years', s: pt(f.peakEarn.s, f.peakEarn.s - 2, f.peakEarn.s + 2), e: pt(f.peakEarn.e, f.peakEarn.e - 3, f.peakEarn.e + 5), prov: 'data', conf: 0.72, basis: 'Median earnings peak in the 45–54 age bracket.', source: SOURCES.income });
   if (f.roleShift)
     add(ctx, { id: 'plateau', dom: 'career', kind: 'event', label: 'Career role-shift', at: f.roleShift, prov: 'inferred', conf: 0.45, dispo: true, derived: ['caregiving'], basis: 'A deprioritization of career, often coinciding with eldercare.', source: 'Heuristic (derived)' });
-  add(ctx, { id: 'retire', dom: 'career', kind: 'event', label: 'Retirement', at: f.retire, prov: 'data', conf: 0.6, basis: 'Average retirement age, adjusted for your profession.', source: SOURCES.retirement });
+  add(ctx, { id: 'retire', dom: 'career', kind: 'event', label: 'Retirement', at: f.retire, prov: 'data', conf: 0.6, basis: 'Median retirement age (people retire ≈62, expect ≈65), adjusted for your profession.', source: SOURCES.retirement });
   add(ctx, { id: 'encore', dom: 'career', kind: 'phase', label: 'Wind-down / encore work', s: f.retire, e: pt(f.retire.est + 6), prov: 'inferred', conf: 0.4, basis: 'Inferred partial-work tail after retirement.', source: SOURCES.heuristic });
 }
 

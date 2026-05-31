@@ -1,46 +1,42 @@
-// Other reference statistics + heuristics. Each entry notes whether it is grounded in
-// published data ('data') or an inference ('inferred'), so the engine can label provenance.
+// Reference statistics + heuristics, grounded in published data where possible.
+// Each value notes whether it's data-backed or an inference, and its source string is
+// surfaced in the app's "Source" field so estimates are traceable / falsifiable.
 
-/** Age at which cardiovascular risk meaningfully climbs, by sex. (data) */
-export const CVD_ONSET_AGE = { male: 55, female: 62, other: 58 };
+/** Age at which cardiovascular risk meaningfully climbs (decade before avg first event:
+ *  ≈65.5 men, ≈72 women). Source: AHA Heart Disease & Stroke Statistics. (data) */
+export const CVD_ONSET_AGE = { male: 55, female: 65, other: 60 };
 
-/** Typical retirement age (US average ~64–65). (data) */
-export const RETIREMENT_AGE = { est: 65, lo: 62, hi: 68 };
+/** Retirement age — median actual ≈62, expected ≈65. Source: EBRI RCS 2024. (data) */
+export const RETIREMENT_AGE = { est: 63, lo: 60, hi: 67 };
 
 /** Profession nudges to retirement age (years). Positive = later. (inferred) */
 export const RETIRE_BY_PROFESSION = {
-  'manual / trades': -2,
-  'healthcare': 0,
-  'education': -1,
-  'knowledge work': 0,
-  'business / finance': 1,
-  'self-employed': 3,
-  'public service': -2,
-  'creative / arts': 2,
+  'manual / trades': -2, 'healthcare': 0, 'education': -1, 'knowledge work': 0,
+  'business / finance': 1, 'self-employed': 3, 'public service': -2, 'creative / arts': 2,
 };
 
-/** Age range of leaving the parental home. (data) */
-export const LEAVE_HOME_AGE = { est: 19, lo: 18, hi: 22 };
+/** Age of leaving the parental home — median ≈19–20, trending into the mid-20s.
+ *  Source: U.S. Census Bureau / BLS (NLSY). (data) */
+export const LEAVE_HOME_AGE = { est: 20, lo: 18, hi: 26 };
 
 /** College years, as ages. (data) */
 export const COLLEGE_AGE = { start: 18, end: 22 };
 
-/** Peak earning years, as ages, for typical careers. (data) */
-export const PEAK_EARNING_AGE = { start: 35, end: 60 };
+/** Peak earning years — earnings peak in the 45–54 bracket. Source: BLS usual weekly
+ *  earnings by age. (data) */
+export const PEAK_EARNING_AGE = { start: 35, peakStart: 45, peakEnd: 54, end: 58 };
 
-/** Caregiving span before each parent's death, in years, by caregiving propensity. (inferred) */
+/** Caregiving span before each parent's death, in years, by intensity. (inferred) */
 export const CAREGIVING_SPAN = { low: 4, med: 6, high: 9 };
 
-/** How many years before retirement a caregiving-driven role-shift tends to land. (inferred) */
-export const ROLE_SHIFT_LEAD = { low: 16, med: 19, high: 23 };
-
-/** Readable description of where a number came from. */
+/** Readable source citations, shown in the app. */
 export const SOURCES = {
-  lifeTable: 'SSA-style period life table',
-  cvd: 'CVD epidemiology (age-stratified)',
-  retirement: 'US retirement-age statistics',
-  leaveHome: 'Household-transition data',
-  income: 'BLS income-by-age',
+  lifeTable: 'SSA period life table',
+  cvd: 'AHA Heart Disease & Stroke Statistics',
+  retirement: 'EBRI Retirement Confidence Survey 2024',
+  leaveHome: 'U.S. Census Bureau / BLS',
+  income: 'BLS usual weekly earnings by age',
+  morbidity: 'Population morbidity data',
   heuristic: 'Heuristic',
   profile: 'Your profile',
   deepDive: 'You (deep dive)',
