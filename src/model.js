@@ -34,7 +34,9 @@ export const pt = (est, lo, hi) => ({ est, lo: lo ?? est, hi: hi ?? est });
 
 /** The six life domains, in display order. */
 export const DOMAINS = [
-  { id: 'self', label: 'Self & Health' },
+  { id: 'physical', label: 'Physical health' },
+  { id: 'mental', label: 'Mental well-being' },
+  { id: 'events', label: 'Life events' },
   { id: 'career', label: 'Career' },
   { id: 'finances', label: 'Finances' },
   { id: 'partner', label: 'Partner' },

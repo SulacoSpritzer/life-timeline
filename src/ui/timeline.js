@@ -21,7 +21,7 @@ export function mountTimeline(root, { profile, onEdit }) {
     profile,
     items: run(profile, { disposition: disp }),
     byId: {}, span: { start: profile.birthYear, end: profile.birthYear + 93 },
-    open: new Set(['self']), multi: false, selected: null,
+    open: new Set(['physical']), multi: false, selected: null,
     firstPaint: true, reveal: new Set(), closing: new Set(),
   };
   let trackW = 900, yearW = 9;

@@ -78,19 +78,19 @@ const future = (ctx, y) => y >= ctx.now - 1;
 
 function selfGen(ctx) {
   const { p, f } = ctx;
-  add(ctx, { id: 'born', dom: 'self', kind: 'event', label: 'Born', at: pt(p.birthYear), prov: 'recorded', conf: 1, basis: 'Stated in profile.', source: SOURCES.profile });
-  add(ctx, { id: 'childhood', dom: 'self', kind: 'phase', label: 'Childhood & education', s: pt(p.birthYear), e: pt(f.eduEnd), prov: 'recorded', conf: 1, basis: 'Birth year plus schooling to your stated level.', source: SOURCES.profile });
-  add(ctx, { id: 'peakhealth', dom: 'self', kind: 'phase', label: 'Peak physical health', s: pt(f.eduEnd - 4), e: pt(f.peakHealthEnd, f.peakHealthEnd - 2, f.peakHealthEnd + 4), prov: 'data', conf: 0.8, basis: 'Physiological performance peaks in the 20s–30s, then eases.', source: 'Exercise-physiology norms' });
-  add(ctx, { id: 'decline', dom: 'self', kind: 'phase', label: 'Gradual physiological decline', s: pt(f.peakHealthEnd, f.peakHealthEnd - 2, f.peakHealthEnd + 4), e: pt(f.illnessStart), prov: 'inferred', conf: 0.55, basis: 'Inferred continuation of age-related decline; not individualized.', source: SOURCES.heuristic });
+  add(ctx, { id: 'born', dom: 'events', kind: 'event', label: 'Born', at: pt(p.birthYear), prov: 'recorded', conf: 1, basis: 'Stated in profile.', source: SOURCES.profile });
+  add(ctx, { id: 'childhood', dom: 'events', kind: 'phase', label: 'Childhood & education', s: pt(p.birthYear), e: pt(f.eduEnd), prov: 'recorded', conf: 1, basis: 'Birth year plus schooling to your stated level.', source: SOURCES.profile });
+  add(ctx, { id: 'peakhealth', dom: 'physical', kind: 'phase', label: 'Peak physical health', s: pt(f.eduEnd - 4), e: pt(f.peakHealthEnd, f.peakHealthEnd - 2, f.peakHealthEnd + 4), prov: 'data', conf: 0.8, basis: 'Physiological performance peaks in the 20s–30s, then eases.', source: 'Exercise-physiology norms' });
+  add(ctx, { id: 'decline', dom: 'physical', kind: 'phase', label: 'Gradual physiological decline', s: pt(f.peakHealthEnd, f.peakHealthEnd - 2, f.peakHealthEnd + 4), e: pt(f.illnessStart), prov: 'inferred', conf: 0.55, basis: 'Inferred continuation of age-related decline; not individualized.', source: SOURCES.heuristic });
   if (future(ctx, f.cvdYear))
-    add(ctx, { id: 'cvd', dom: 'self', kind: 'event', label: 'Cardiovascular risk climbs', at: pt(f.cvdYear, f.cvdYear - 4, f.cvdYear + 6), prov: 'data', conf: 0.7, basis: `Cardiovascular risk climbs through the decade before the average first event (≈65 for men, ≈72 for women).`, source: SOURCES.cvd });
-  add(ctx, { id: 'illness', dom: 'self', kind: 'phase', label: 'Age-linked illness risk', s: pt(f.illnessStart, f.illnessStart - 4, f.illnessStart + 3), e: pt(f.death.est), prov: 'data', conf: 0.6, basis: 'Age-specific morbidity curves.', source: SOURCES.morbidity });
+    add(ctx, { id: 'cvd', dom: 'physical', kind: 'event', label: 'Cardiovascular risk climbs', at: pt(f.cvdYear, f.cvdYear - 4, f.cvdYear + 6), prov: 'data', conf: 0.7, basis: `Cardiovascular risk climbs through the decade before the average first event (≈65 for men, ≈72 for women).`, source: SOURCES.cvd });
+  add(ctx, { id: 'illness', dom: 'physical', kind: 'phase', label: 'Age-linked illness risk', s: pt(f.illnessStart, f.illnessStart - 4, f.illnessStart + 3), e: pt(f.death.est), prov: 'data', conf: 0.6, basis: 'Age-specific morbidity curves.', source: SOURCES.morbidity });
   const adj = f.le.factors.length ? ` Adjusted ${f.le.factors.map((x) => `${x.delta > 0 ? '+' : ''}${x.delta} yr (${x.label})`).join(', ')} → age ${f.death.deathAge}.` : '';
   const deathSrc = f.le.factors.length ? `${SOURCES.lifeTable}; ${[...new Set(f.le.factors.map((x) => x.source))].join('; ')}` : SOURCES.lifeTable;
-  add(ctx, { id: 'death', dom: 'self', kind: 'event', label: 'Life expectancy (est.)', at: f.death, prov: 'data', conf: 0.6, basis: `${SOURCES.lifeTable} for a ${p.sex} aged ${f.age}: about age ${f.baseDeathAge}.${adj}`, source: deathSrc });
+  add(ctx, { id: 'death', dom: 'events', kind: 'event', label: 'Life expectancy (est.)', at: f.death, prov: 'data', conf: 0.6, basis: `${SOURCES.lifeTable} for a ${p.sex} aged ${f.age}: about age ${f.baseDeathAge}.${adj}`, source: deathSrc });
   // deep-dive past events
   (p.pastEvents || []).forEach((ev, i) => add(ctx, {
-    id: `selfpast${i}`, dom: 'self', kind: ev.kind === 'phase' ? 'phase' : 'event', label: ev.label,
+    id: `selfpast${i}`, dom: 'events', kind: ev.kind === 'phase' ? 'phase' : 'event', label: ev.label,
     ...(ev.kind === 'phase' ? { s: pt(ev.year), e: pt(ev.endYear || ev.year + 1) } : { at: pt(ev.year) }),
     prov: 'recorded', conf: 1, addedBy: 'deep-dive', historical: true,
     sentiment: ev.sentiment != null ? S(ev.sentiment, sentLabel(ev.sentiment)) : undefined,
@@ -188,21 +188,21 @@ function cxPhase(ctx, id, startAge, endAge, dom, label) {
 function corpusGen(ctx) {
   const p = ctx.p, dAge = ctx.f.death.est - p.birthYear;
   // universal health-arc
-  cxEvent(ctx, 'health.cancer.incidence', m('health.cancer.incidence', 'medianAge', 67), 58, 74, 'self', 'Median cancer-diagnosis age');
-  cxPhase(ctx, 'health.dementia.onset', 65, dAge, 'self', 'Dementia risk rises');
-  cxEvent(ctx, 'health.sensory.decline', m('health.sensory.decline', 'presbyopiaOnsetAge', 45), 42, 50, 'self', 'Near-vision decline (presbyopia)');
-  cxPhase(ctx, 'health.mental.onset', m('health.mental.onset', 'ageLo', 11), m('health.mental.onset', 'ageHi', 34), 'self', 'Typical mental-health onset window');
+  cxEvent(ctx, 'health.cancer.incidence', m('health.cancer.incidence', 'medianAge', 67), 58, 74, 'physical', 'Median cancer-diagnosis age');
+  cxPhase(ctx, 'health.dementia.onset', 65, dAge, 'mental', 'Dementia risk rises');
+  cxEvent(ctx, 'health.sensory.decline', m('health.sensory.decline', 'presbyopiaOnsetAge', 45), 42, 50, 'physical', 'Near-vision decline (presbyopia)');
+  cxPhase(ctx, 'health.mental.onset', m('health.mental.onset', 'ageLo', 11), m('health.mental.onset', 'ageHi', 34), 'mental', 'Typical mental-health onset window');
   if (p.sex === 'female') {
-    cxEvent(ctx, 'reproductive.menopause', m('reproductive.menopause', 'age', 52), 45, 55, 'self', 'Menopause');
-    cxPhase(ctx, 'health.bone.peak', 52, dAge, 'self', 'Bone loss / osteoporosis risk');
+    cxEvent(ctx, 'reproductive.menopause', m('reproductive.menopause', 'age', 52), 45, 55, 'physical', 'Menopause');
+    cxPhase(ctx, 'health.bone.peak', 52, dAge, 'physical', 'Bone loss / osteoporosis risk');
   }
   // heritable-risk windows — gated by family history (cited relative risk in the basis)
-  if (fhHas(p, 'heart disease')) cxPhase(ctx, 'heritability.heart-disease', 45, 75, 'self', 'Heart-disease risk · family history');
-  if (fhHas(p, 'type 2 diabetes')) cxPhase(ctx, 'heritability.diabetes', 40, dAge, 'self', 'Diabetes risk · family history');
-  if (fhHas(p, 'cancer') && p.sex === 'female') cxPhase(ctx, 'heritability.breast-cancer', 40, 70, 'self', 'Breast-cancer risk · family history');
-  if (fhHas(p, 'cancer')) cxPhase(ctx, 'heritability.colorectal-cancer', 45, 75, 'self', 'Colorectal-cancer risk · family history');
-  if (fhHas(p, 'dementia')) cxPhase(ctx, 'heritability.alzheimers', 65, dAge, 'self', 'Alzheimer’s risk · family history');
-  if (fhHas(p, 'depression/anxiety')) cxPhase(ctx, 'heritability.depression', 20, dAge, 'self', 'Depression risk · family history');
+  if (fhHas(p, 'heart disease')) cxPhase(ctx, 'heritability.heart-disease', 45, 75, 'physical', 'Heart-disease risk · family history');
+  if (fhHas(p, 'type 2 diabetes')) cxPhase(ctx, 'heritability.diabetes', 40, dAge, 'physical', 'Diabetes risk · family history');
+  if (fhHas(p, 'cancer') && p.sex === 'female') cxPhase(ctx, 'heritability.breast-cancer', 40, 70, 'physical', 'Breast-cancer risk · family history');
+  if (fhHas(p, 'cancer')) cxPhase(ctx, 'heritability.colorectal-cancer', 45, 75, 'physical', 'Colorectal-cancer risk · family history');
+  if (fhHas(p, 'dementia')) cxPhase(ctx, 'heritability.alzheimers', 65, dAge, 'mental', 'Alzheimer’s risk · family history');
+  if (fhHas(p, 'depression/anxiety')) cxPhase(ctx, 'heritability.depression', 20, dAge, 'mental', 'Depression risk · family history');
 }
 
 /** Run all generators for a profile + caregiving propensity. @returns {import('../model.js').Item[]} */
