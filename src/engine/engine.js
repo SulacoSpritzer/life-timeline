@@ -4,6 +4,7 @@
 
 import { NOW, pt, clampYear } from '../model.js';
 import { deathYearEst, lifeExpectancyDelta } from '../data/lifeTables.js';
+import { getFact, cite } from '../corpus/corpus.js';
 import {
   CVD_ONSET_AGE, RETIREMENT_AGE, RETIRE_BY_PROFESSION, LEAVE_HOME_AGE, COLLEGE_AGE,
   PEAK_EARNING_AGE, CAREGIVING_SPAN, SOURCES,
@@ -168,11 +169,47 @@ function parentsGen(ctx) {
   }
 }
 
+/* ---------------- corpus-driven items ----------------
+ * Render facts from the life-arc corpus as timeline items, dated from the profile.
+ * Health-arc milestones show for everyone; heritable-risk windows are gated by family history.
+ */
+const m = (id, key, def) => { const f = getFact(id); return f && f.metric && f.metric[key] != null ? f.metric[key] : def; };
+const fhHas = (p, c) => (p.familyHistory || []).includes(c);
+function cxEvent(ctx, id, age, lo, hi, dom, label) {
+  const f = getFact(id); if (!f || age == null) return;
+  const b = ctx.p.birthYear;
+  add(ctx, { id: `cx.${id}`, dom, kind: 'event', label, at: pt(b + Math.round(age), b + (lo ?? age), b + (hi ?? age)), prov: 'data', conf: f.confidence ?? 0.6, basis: f.statement, source: cite(id), addedBy: 'data' });
+}
+function cxPhase(ctx, id, startAge, endAge, dom, label) {
+  const f = getFact(id); if (!f) return;
+  const b = ctx.p.birthYear;
+  add(ctx, { id: `cx.${id}`, dom, kind: 'phase', label, s: pt(b + startAge), e: pt(b + endAge), prov: 'inferred', conf: f.confidence ?? 0.5, basis: f.statement, source: cite(id), addedBy: 'inferred' });
+}
+function corpusGen(ctx) {
+  const p = ctx.p, dAge = ctx.f.death.est - p.birthYear;
+  // universal health-arc
+  cxEvent(ctx, 'health.cancer.incidence', m('health.cancer.incidence', 'medianAge', 67), 58, 74, 'self', 'Median cancer-diagnosis age');
+  cxPhase(ctx, 'health.dementia.onset', 65, dAge, 'self', 'Dementia risk rises');
+  cxEvent(ctx, 'health.sensory.decline', m('health.sensory.decline', 'presbyopiaOnsetAge', 45), 42, 50, 'self', 'Near-vision decline (presbyopia)');
+  cxPhase(ctx, 'health.mental.onset', m('health.mental.onset', 'ageLo', 11), m('health.mental.onset', 'ageHi', 34), 'self', 'Typical mental-health onset window');
+  if (p.sex === 'female') {
+    cxEvent(ctx, 'reproductive.menopause', m('reproductive.menopause', 'age', 52), 45, 55, 'self', 'Menopause');
+    cxPhase(ctx, 'health.bone.peak', 52, dAge, 'self', 'Bone loss / osteoporosis risk');
+  }
+  // heritable-risk windows — gated by family history (cited relative risk in the basis)
+  if (fhHas(p, 'heart disease')) cxPhase(ctx, 'heritability.heart-disease', 45, 75, 'self', 'Heart-disease risk · family history');
+  if (fhHas(p, 'type 2 diabetes')) cxPhase(ctx, 'heritability.diabetes', 40, dAge, 'self', 'Diabetes risk · family history');
+  if (fhHas(p, 'cancer') && p.sex === 'female') cxPhase(ctx, 'heritability.breast-cancer', 40, 70, 'self', 'Breast-cancer risk · family history');
+  if (fhHas(p, 'cancer')) cxPhase(ctx, 'heritability.colorectal-cancer', 45, 75, 'self', 'Colorectal-cancer risk · family history');
+  if (fhHas(p, 'dementia')) cxPhase(ctx, 'heritability.alzheimers', 65, dAge, 'self', 'Alzheimer’s risk · family history');
+  if (fhHas(p, 'depression/anxiety')) cxPhase(ctx, 'heritability.depression', 20, dAge, 'self', 'Depression risk · family history');
+}
+
 /** Run all generators for a profile + caregiving propensity. @returns {import('../model.js').Item[]} */
 export function run(profile, opts = {}) {
   const disp = opts.disposition || profile.disposition?.caregiving || 'med';
   const ctx = { p: profile, disp, now: opts.now ?? NOW, items: [], f: computeFacts(profile, disp, opts.now ?? NOW) };
-  selfGen(ctx); childrenGen(ctx); parentsGen(ctx); careerGen(ctx); partnerGen(ctx); financesGen(ctx);
+  selfGen(ctx); childrenGen(ctx); parentsGen(ctx); careerGen(ctx); partnerGen(ctx); financesGen(ctx); corpusGen(ctx);
   // prune derived/affects links that point at items that weren't generated (sparse profiles)
   const ids = new Set(ctx.items.map((i) => i.id));
   ctx.items.forEach((i) => {

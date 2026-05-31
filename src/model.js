@@ -70,6 +70,7 @@ export const emptyProfile = () => ({
   profession: '',
   education: '',
   health: { smoker: false, conditions: [] },
+  familyHistory: [],
   partner: { status: 'single' },
   children: [],
   parents: [],

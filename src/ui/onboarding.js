@@ -53,6 +53,13 @@ export function mountOnboarding(root, { existing, onComplete }) {
       collect: () => { draft.health = { smoker: pick('f-smoke') === 'yes', conditions: (get('f-cond') || '').split(',').map((s) => s.trim()).filter(Boolean) }; },
     },
     {
+      title: 'Family history', q: 'Does any of this run in your close family?',
+      hint: 'First-degree relatives — parents and siblings. This shapes your heritable risks, and your children’s.',
+      unlock: 'Adds heritable-risk windows — heart disease, diabetes, cancers, dementia, depression.',
+      body: () => `<div class="ob-field">${multichoice('f-fhx', ['heart disease', 'cancer', 'type 2 diabetes', 'dementia', 'depression/anxiety', 'addiction'], draft.familyHistory)}</div>`,
+      collect: () => { draft.familyHistory = [...root.querySelectorAll('[data-group="f-fhx"] [aria-pressed="true"]')].map((b) => b.dataset.v); },
+    },
+    {
       title: 'Partner', q: 'Are you partnered?',
       hint: 'Defines the relationship arc and, with children, the empty-nest phase.',
       unlock: 'Adds the <b>partner</b> domain.',
@@ -126,7 +133,8 @@ export function mountOnboarding(root, { existing, onComplete }) {
     // choice groups: live selection
     root.querySelectorAll('[data-group]').forEach((grp) => grp.addEventListener('click', (e) => {
       const b = e.target.closest('[data-v]'); if (!b) return;
-      grp.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b));
+      if (grp.dataset.multi) b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') !== 'true');
+      else grp.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b));
     }));
     if (s.wire) s.wire(root, () => { render(); });
 
@@ -149,6 +157,9 @@ export function mountOnboarding(root, { existing, onComplete }) {
 /* ---- small render helpers ---- */
 function choice(name, opts, sel) {
   return `<span class="choice" data-group="${name}">${opts.map(([v, l]) => `<button data-v="${v}" aria-pressed="${sel === v}">${l}</button>`).join('')}</span>`;
+}
+function multichoice(name, opts, sel) {
+  return `<span class="choice" data-group="${name}" data-multi="1">${opts.map((o) => `<button data-v="${o}" aria-pressed="${(sel || []).includes(o)}">${o}</button>`).join('')}</span>`;
 }
 function kidRow(c, i) {
   return `<div class="rep"><span class="ob-label" style="margin:0">Child ${i + 1}</span>
