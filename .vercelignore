@@ -1,3 +1,7 @@
 .claude/
+.github/
 devserver.py
 .gitignore
+package.json
+tests/
+TESTING.md
