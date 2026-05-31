@@ -111,7 +111,6 @@ export function mountTimeline(root, { profile, onEdit }) {
   }
 
   const labelAnchor = (startPx, label) => (startPx + label.length * 7.2 + 30 > trackW - PADR ? 'end' : 'start');
-  const sentGlyph = (it) => { if (!it.sentiment) return ''; const v = it.sentiment.v, g = v > 0 ? '▲' : v < 0 ? '▼' : '■'; return `<tspan dx="7" fill="${INK2}" font-size="11">${g}</tspan>`; };
   const provTspan = (it) => `<tspan dx="8" class="ptag" fill="${FAINT}">${PROVWORD[it.prov].toUpperCase()}</tspan>`;
   const star = (it) => (it.derived && it.derived.length ? `<tspan fill="${ACCENT}">✦ </tspan>` : '');
   function unfold(it) {
@@ -138,7 +137,7 @@ export function mountTimeline(root, { profile, onEdit }) {
         inner += `<rect class="core" x="${g.coreL}" y="${cy - H_BAR / 2}" width="${Math.max(2, g.coreR - g.coreL)}" height="${H_BAR}" rx="${H_BAR / 2}" fill="${alpha(col, a)}"/>`;
       }
       const anc = labelAnchor(g.sE, it.label), lx = anc === 'end' ? g.eE : g.sE;
-      inner += `<text class="lbl" x="${lx}" y="${labelY}" text-anchor="${anc}">${star(it)}${esc(it.label)}${sentGlyph(it)}${provTspan(it)}</text>`;
+      inner += `<text class="lbl" x="${lx}" y="${labelY}" text-anchor="${anc}">${star(it)}${esc(it.label)}${provTspan(it)}</text>`;
       inner += `<rect class="hit" x="${g.coreL - 3}" y="${laneTop + 2}" width="${Math.max(8, g.coreR - g.coreL) + 6}" height="${laneH - 4}" rx="5" fill="transparent"/>`;
     } else {
       if (g.lox < g.cx - 2 || g.hix > g.cx + 2) {
@@ -149,7 +148,7 @@ export function mountTimeline(root, { profile, onEdit }) {
       const o = it.prov === 'inferred';
       inner += `<circle class="core" cx="${g.cx}" cy="${cy}" r="${MK}" fill="${o ? PAPER : alpha(col, it.prov === 'recorded' ? 0.85 : 0.5)}" stroke="${col}" stroke-width="1.4"/>`;
       const anc = labelAnchor(g.cx, it.label), lx = anc === 'end' ? g.cx + MK : g.cx + MK + 6;
-      inner += `<text class="lbl" x="${lx}" y="${labelY}" text-anchor="${anc}">${star(it)}${esc(it.label)}${sentGlyph(it)}${provTspan(it)}</text>`;
+      inner += `<text class="lbl" x="${lx}" y="${labelY}" text-anchor="${anc}">${star(it)}${esc(it.label)}${provTspan(it)}</text>`;
       inner += `<rect class="hit" x="${g.cx - 10}" y="${laneTop + 2}" width="20" height="${laneH - 4}" rx="5" fill="transparent"/>`;
     }
     return gOpen(it) + inner + '</g>';
@@ -201,7 +200,6 @@ export function mountTimeline(root, { profile, onEdit }) {
     h += `<h3>${it.derived && it.derived.length ? '<span class="a">✦ </span>' : ''}${esc(it.label)}</h3>`;
     h += `<div class="when">${when}</div>`;
     h += `<div class="prov">${PROVWORD[it.prov]}`;
-    if (it.sentiment) { const v = it.sentiment.v, g = v > 0 ? '▲' : v < 0 ? '▼' : '■'; h += `<span class="sent"> &nbsp; ${g} felt: ${esc(it.sentiment.label)}</span>`; }
     h += `</div>`;
     h += `<div class="kv"><div class="k">Confidence</div><div class="v">${cp}%</div><div class="meter"><i style="width:${cp}%"></i></div></div>`;
     h += `<div class="kv"><div class="k">Basis</div><div class="v">${esc(it.basis)}</div></div>`;
@@ -225,18 +223,14 @@ export function mountTimeline(root, { profile, onEdit }) {
           <div class="ob-field"><label class="ob-label">${isP ? 'Began' : 'Year'}</label><input class="ob-input short" id="af-start" inputmode="numeric" placeholder="2009"></div>
           ${isP ? `<div class="ob-field"><label class="ob-label">Ended</label><input class="ob-input short" id="af-end" inputmode="numeric" placeholder="2012"></div>` : ''}
         </div>
-        <div class="ob-field"><label class="ob-label">How it felt</label>
-          <span class="choice" id="af-sent"><button data-v="2">very good</button><button data-v="1">good</button><button data-v="-1">hard</button><button data-v="-2">very hard</button></span></div>
         <div class="ob-actions"><button class="btn" id="af-save">Add to timeline</button><button class="btn ghost" id="af-cancel">Cancel</button></div>
       </div></div>`;
-    let sent = null;
-    $('#af-sent').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (!b) return; sent = +b.dataset.v; $('#af-sent').querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b)); });
     $('#af-cancel').addEventListener('click', showHint);
     $('#af-save').addEventListener('click', () => {
       const label = $('#af-label').value.trim(), start = parseInt($('#af-start').value, 10);
       if (!label || !start) return;
-      if (isP) (state.profile.pastRelationships ||= []).push({ label, birthYear: start, endYear: parseInt($('#af-end')?.value, 10) || start + 2, sentiment: sent ?? undefined });
-      else (state.profile.pastEvents ||= []).push({ label, year: start, sentiment: sent ?? undefined, kind: 'event' });
+      if (isP) (state.profile.pastRelationships ||= []).push({ label, birthYear: start, endYear: parseInt($('#af-end')?.value, 10) || start + 2 });
+      else (state.profile.pastEvents ||= []).push({ label, year: start, kind: 'event' });
       saveProfile(state.profile);
       state.items = run(state.profile, { disposition: disp });
       if (!state.open.has(domId)) { if (!state.multi) state.open.clear(); state.open.add(domId); }
@@ -281,7 +275,6 @@ export function mountTimeline(root, { profile, onEdit }) {
     const li = [esc(when), `<b>${cap(PROVWORD[it.prov])}</b> · ${Math.round(it.conf * 100)}% confidence`, esc(it.basis)];
     if (it.derived && it.derived.length) li.push(`<b>Derived from</b> ${esc(names(it.derived))}`);
     if (it.affects && it.affects.length) li.push(`<b>Affects</b> ${esc(names(it.affects))}`);
-    if (it.sentiment) li.push(`<b>Felt</b> ${esc(it.sentiment.label)}`);
     li.push(`<b>Source</b> ${esc(it.source)}`);
     return `<div class="tip-h">${it.derived && it.derived.length ? '<span class="a">✦ </span>' : ''}${esc(it.label)}</div><ul>${li.map((b) => `<li>${b}</li>`).join('')}</ul>`;
   }
