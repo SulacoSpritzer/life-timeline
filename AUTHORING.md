@@ -40,6 +40,41 @@ on whose authority.* Two kinds of metadata on it drive two destinations automati
 
 ---
 
+## Questions are separate from facts — the registry
+
+A fact does **not** contain its question. Questions live once, in the **Input registry**
+([`src/corpus/inputs.js`](src/corpus/inputs.js)). A fact only *references* input ids. Three entities:
+
+- **Input** — a canonical question (`id`, `prompt`, `type`, `options`, `group`, `tier`). Defined once.
+- **Fact** — references inputs via `requires` (hard needs) and `conditioning`/`appliesIf` (strata).
+- **Profile** — one person's answers, `{ inputId: value }`. The timeline is **facts × profile**.
+
+It is **many-to-many**: one input feeds many facts; one fact needs many inputs.
+
+Two rules fall out of this, mechanically:
+
+1. **No data point, no question.** Onboarding is *derived*: `deriveInputs(facts)` returns the union of
+   inputs that some fact references. An input nothing references is never asked. Delete the last fact
+   that needs `smoker`, and the smoking question disappears on its own.
+2. **No asking the same thing nine ways.** Because facts point at a canonical id, the question is asked
+   once and reused. Against the current 46 facts, `sex` is referenced by **14** facts but is **one**
+   question; deduped, 46 facts need just **5** questions — naively that would be 65 prompts (~13× fewer).
+
+**Traceability runs both ways.** For any question, `factsNeeding(facts, 'sex')` lists the facts that
+justify it — so nothing is ever asked without a reason in the data. For any fact, `requires` + `emit`
+show exactly what it consumes and what it produces. That is the audit trail.
+
+Only **askable** `conditioning` keys become questions (`sex`, `education`, `region`, `smoker`,
+`partnered`, `profession`). Descriptive keys (`country`, `year`, `measure`, `population`) are metadata,
+not questions — so the corpus's bookkeeping never leaks into the form.
+
+> Coverage grows as facts declare their needs. Today most researched facts carry `sex`/`education`
+> strata, so 5 questions light up. As facts add explicit `requires` (e.g. `partner.widowhood` →
+> `requires:['partner']`, `children.number` → `requires:['children']`), those questions activate
+> automatically — no form edits, ever.
+
+---
+
 ## Anatomy of a Fact
 
 | Field | Drives | Meaning |
@@ -184,6 +219,7 @@ the next step, and after it, authoring is exactly the one-row act described here
 ```
 src/corpus/corpus.js            schema (Fact typedef) + seed facts + read API + merge
 src/corpus/facts-researched.js  workflow-researched facts (assembled, regenerable)
+src/corpus/inputs.js            the Input registry (canonical questions) + deriveInputs()
 CORPUS.md                       what the corpus is, coverage, source policy
 AUTHORING.md                    this file — how to add, and how it propagates
 ```
