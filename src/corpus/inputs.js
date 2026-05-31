@@ -32,10 +32,14 @@ export const INPUTS = [
   { id: 'currentRegion', label: 'Where you live', prompt: 'Where do you live now?', type: 'text', group: 'place', tier: 'standard' },
   { id: 'birthRegion', label: 'Where you grew up', prompt: 'Where did you grow up?', type: 'text', group: 'place', tier: 'standard' },
   { id: 'smoker', label: 'Smoking', prompt: 'Do you smoke?', type: 'boolean', group: 'health', tier: 'standard' },
-  { id: 'conditions', label: 'Conditions', prompt: 'Any major health conditions?', type: 'list', group: 'health', tier: 'deep' },
-  { id: 'partner', label: 'Partner', prompt: 'Are you partnered?', type: 'object', group: 'family', tier: 'standard' },
-  { id: 'children', label: 'Children', prompt: 'Do you have children?', type: 'list', group: 'family', tier: 'standard' },
-  { id: 'parents', label: 'Parents', prompt: "Your parents' birth years and status?", type: 'list', group: 'family', tier: 'standard' },
+  { id: 'conditions', label: 'Your conditions', prompt: 'Any major health conditions of your own?', type: 'list', group: 'health', tier: 'standard' },
+  // Family history drives heritability facts (your risk, and your children's).
+  { id: 'familyHistory', label: 'Family history', prompt: 'Do any of these run in your close family — heart disease, cancer, type 2 diabetes, dementia, depression/anxiety, addiction?', type: 'list', options: ['heart disease', 'cancer', 'type 2 diabetes', 'dementia', 'depression/anxiety', 'addiction'], group: 'health', tier: 'standard' },
+  { id: 'partner', label: 'Partner', prompt: 'Are you partnered? Since when?', type: 'object', group: 'family', tier: 'standard' },
+  // children[]: { birthYear, sex?, conditions?[] }  — conditions/disability drive child-health facts.
+  { id: 'children', label: 'Children', prompt: 'For each child: birth year, and any disability or condition.', type: 'list', group: 'family', tier: 'standard' },
+  // parents[]: { birthYear, sex, alive, diedYear?, diedCause?, conditions?[] }
+  { id: 'parents', label: 'Parents', prompt: 'For each parent: birth year, living or passed (and the year), and any major conditions.', type: 'list', group: 'family', tier: 'standard' },
 ];
 
 const BY_ID = Object.fromEntries(INPUTS.map((i) => [i.id, i]));
@@ -53,6 +57,10 @@ const COND_TO_INPUT = {
   region: 'currentRegion',
   partnered: 'partner', partnerStatus: 'partner',
   profession: 'profession',
+  familyHistory: 'familyHistory', familyHx: 'familyHistory',
+  hasChildren: 'children', childCondition: 'children',
+  parentAlive: 'parents', parentConditions: 'parents', parentAge: 'parents',
+  conditions: 'conditions',
 };
 
 const tierRank = (t) => ({ core: 0, standard: 1, deep: 2 }[t] ?? 1);
