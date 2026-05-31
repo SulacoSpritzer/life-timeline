@@ -34,13 +34,22 @@ Query helpers: `getFact(id)`, `factsForDomain(domain)`, `factsByTag(tag)`, `cite
 - US-centric for v1; `conditioning` is the hook for sex / education / region / behavior strata,
   and later for other countries.
 
-## Seed coverage (this commit)
+## Coverage
 
-16 facts, all cited — mortality (life table, smoking, education, healthy-life-expectancy), the
-body/health arc (muscle peak & decline, cardiovascular, menopause), cognition (processing speed,
-crystallized knowledge), career (peak earnings, retirement), and family (first birth, leaving home).
-Sources: SSA, Jha et al. NEJM 2013, IHME/Lancet 2024, NIH/NIA (BLSA, menopause, sarcopenia),
-CDC NCHS NVSS, Hartshorne & Germine 2015, AHA, BLS, EBRI, U.S. Census.
+**~42 cited facts** across all six domains, in two layers:
+
+- **Seed** ([`corpus.js`](src/corpus/corpus.js)) — 14 hand-curated anchors (life table, smoking,
+  education, muscle, menopause, cognition, peak earnings, retirement, first birth, leaving home…).
+- **Researched** ([`facts-researched.js`](src/corpus/facts-researched.js)) — built by an orchestrated
+  research workflow: each topic was researched, then **independently verified against its cited source**
+  (the verifier caught and fixed real errors — e.g. a mislabeled NHANES series, and that the
+  lowest-life-expectancy state is West Virginia, not Mississippi), then emitted as a structured fact.
+  Covers cancer / dementia / mental-health onset, the income–life-expectancy gap (14.6 yr for men),
+  state-level variation, disability, sensory decline, bone loss, job tenure, divorce / marriage /
+  widowhood, fertility, grandparenthood, caregiving, inheritance, and more.
+
+Sources include NIH/NIA, NCI SEER, CDC/NCHS, SSA, BLS, U.S. Census, Federal Reserve, AHA, EBRI,
+AARP/NAC, NEJM, JAMA, Lancet/IHME, Molecular Psychiatry, Alzheimer's Association.
 
 ## Build-out matrix (the research roadmap)
 

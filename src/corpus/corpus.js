@@ -29,8 +29,10 @@
  * @property {string[]} [tags]
  */
 
-/** @type {Fact[]} */
-export const FACTS = [
+import { RESEARCHED_FACTS } from './facts-researched.js';
+
+/** @type {Fact[]} hand-seeded facts */
+const SEED_FACTS = [
   // ── MORTALITY (self) ──────────────────────────────────────────────────────
   {
     id: 'mortality.life-table', domain: 'self', topic: 'Life expectancy', kind: 'distribution',
@@ -158,6 +160,16 @@ export const FACTS = [
     tags: ['family', 'transition'],
   },
 ];
+
+/** Merge seed + researched facts, deduped by id (researched wins on collision). */
+function dedupeById(list) {
+  const m = new Map();
+  for (const f of list) m.set(f.id, f);
+  return [...m.values()];
+}
+
+/** @type {Fact[]} The full corpus: hand-seeded + workflow-researched, all cited. */
+export const FACTS = dedupeById([...SEED_FACTS, ...RESEARCHED_FACTS]);
 
 // ── query helpers ───────────────────────────────────────────────────────────
 const BY_ID = Object.fromEntries(FACTS.map((f) => [f.id, f]));
