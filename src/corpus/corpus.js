@@ -23,6 +23,10 @@
  * @property {string} statement          plain-language statement
  * @property {Object} metric             structured numbers (ages, years, %, deltas…) the engine can use
  * @property {Object} [conditioning]     who/what it applies to: {sex?, education?, smoker?, region?…}
+ * @property {string[]} [requires]       profile inputs onboarding must collect, e.g. ['birthYear','sex','partner']
+ * @property {Object} [emit]             how it becomes a timeline item (see AUTHORING.md):
+ *   {as:'event'|'phase'|'none', label, domain?, appliesIf?, atAge?, loAge?, hiAge?, startAge?, endAge?,
+ *    relativeTo?:{factId,offsetYears?}, recurEveryYears?, derivedFrom?, affects?, sentiment?}
  * @property {'data'|'inferred'} provenance
  * @property {number} confidence         0..1
  * @property {Source} source
