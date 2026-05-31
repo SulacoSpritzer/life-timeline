@@ -90,14 +90,6 @@ export function mountOnboarding(root, { existing, onComplete }) {
         rootEl.querySelectorAll('.par-alive').forEach((grp) => grp.addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (b) grp.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b)); }));
       },
     },
-    {
-      title: 'Disposition', q: 'When the people you love need care, you tend to…',
-      hint: 'This seeds how fully caregiving reshapes your other domains. You can change it any time.',
-      unlock: 'Personalizes the projections — caregiving, the career role-shift, and partner strain.',
-      body: () => `
-        <div class="ob-field">${choice('f-disp', [['low', 'Hold your line'], ['med', 'Balance it'], ['high', 'Lean all the way in']], draft.disposition?.caregiving || 'med')}</div>`,
-      collect: () => { draft.disposition = { caregiving: pick('f-disp') || 'med' }; },
-    },
   ];
 
   function get(id) { const el = root.querySelector('#' + id); return el ? el.value.trim() : ''; }

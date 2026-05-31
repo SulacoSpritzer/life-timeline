@@ -98,7 +98,7 @@ function careerGen(ctx) {
   add(ctx, { id: 'early', dom: 'career', kind: 'phase', label: 'Early career', s: pt(f.eduEnd), e: pt(f.eduEnd + 10), prov: 'recorded', conf: 1, basis: 'Observed history.', source: SOURCES.profile });
   add(ctx, { id: 'peakearn', dom: 'career', kind: 'phase', label: 'Peak earning years', s: pt(f.peakEarn.s, f.peakEarn.s - 2, f.peakEarn.s + 2), e: pt(f.peakEarn.e, f.peakEarn.e - 3, f.peakEarn.e + 5), prov: 'data', conf: 0.72, basis: 'Earnings-by-age curve for your field peaks ~45–60.', source: SOURCES.income });
   if (f.roleShift)
-    add(ctx, { id: 'plateau', dom: 'career', kind: 'event', label: 'Career role-shift', at: f.roleShift, prov: 'inferred', conf: 0.45, dispo: true, derived: ['caregiving'], basis: 'A deprioritization of career, often coinciding with eldercare.', source: 'Heuristic (disposition-driven)' });
+    add(ctx, { id: 'plateau', dom: 'career', kind: 'event', label: 'Career role-shift', at: f.roleShift, prov: 'inferred', conf: 0.45, dispo: true, derived: ['caregiving'], basis: 'A deprioritization of career, often coinciding with eldercare.', source: 'Heuristic (derived)' });
   add(ctx, { id: 'retire', dom: 'career', kind: 'event', label: 'Retirement', at: f.retire, prov: 'data', conf: 0.6, basis: 'Average retirement age, adjusted for your profession.', source: SOURCES.retirement });
   add(ctx, { id: 'encore', dom: 'career', kind: 'phase', label: 'Wind-down / encore work', s: f.retire, e: pt(f.retire.est + 6), prov: 'inferred', conf: 0.4, basis: 'Inferred partial-work tail after retirement.', source: SOURCES.heuristic });
 }
@@ -157,8 +157,8 @@ function parentsGen(ctx) {
       id: 'caregiving', dom: 'parents', kind: 'phase', label: 'Eldercare / caregiving', s: f.caregiving.s, e: f.caregiving.e,
       prov: 'inferred', conf: 0.5, dispo: true, highlight: true, sentiment: S(-1, 'anticipated strain'),
       derived: deathIds, affects: ['plateau', 'emptypartner'],
-      basis: "Active caregiving typically spans the final 5–10 years of a parent's life. Derived from the parental-mortality estimates and sized by caregiving propensity; drives the career role-shift and partner strain.",
-      source: 'Heuristic (derived + disposition)',
+      basis: "Active caregiving typically spans the final 5–10 years of a parent's life. Derived from the parental-mortality estimates; it pulls on career and partnership.",
+      source: 'Heuristic (derived)',
     });
   }
 }
