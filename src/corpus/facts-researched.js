@@ -162,6 +162,165 @@ export const RESEARCHED_FACTS = [
     ]
   },
   {
+    "id": "origins.cohort-recession",
+    "domain": "career",
+    "topic": "Graduating into a recession (cohort effect on earnings)",
+    "kind": "rate",
+    "statement": "Entering the labor market during a recession cuts initial earnings by about 9% (roughly a 6-7% wage loss per 1 percentage-point rise in the graduation-year unemployment rate), shrinking by about 0.25 pp per year and largely fading after 8-15 years, though losses are effectively permanent for the most disadvantaged graduates.",
+    "metric": {
+      "initialEarningsLossPct": 9,
+      "lossPerUnemploymentPointPctLo": 6,
+      "lossPerUnemploymentPointPctHi": 7,
+      "annualDeclinePctPerYear": 0.25,
+      "residualLossAt15YearsPct": 2.5,
+      "fadeYearsLo": 8,
+      "fadeYearsHi": 15
+    },
+    "conditioning": {
+      "appliesAt": "labor-market-entry / graduation year",
+      "drivenBy": "graduation-year unemployment rate",
+      "subgroup": "effects effectively permanent for least-advantaged graduates"
+    },
+    "provenance": "data",
+    "confidence": 0.92,
+    "source": {
+      "org": "American Economic Journal: Applied Economics",
+      "title": "The Short- and Long-Term Career Effects of Graduating in a Recession (Oreopoulos, von Wachter & Heisz); corroborated by Kahn 2010 (Labour Economics) and von Wachter 2020 (JEP)",
+      "year": 2012,
+      "url": "https://www.aeaweb.org/articles?id=10.1257/app.4.1.1"
+    },
+    "requires": [
+      "birthYear",
+      "education"
+    ],
+    "note": "Foundational coefficients (~9% initial loss, ~6-7% per pp of graduation-year unemployment, fade over 8-10 years per Oreopoulos et al.) independently confirmed verbatim against original sources and the NBER digest, and corroborated by an SF Fed letter and von Wachter's 2020 JEP synthesis (effects \"fade after ten to fifteen years\"). Kahn (2010, US NLSY) finds longer persistence with ~2.5% still significant at 15 years; the 8-10 vs 10-15 year fade reflects a real cross-dataset range (US NLSY vs Canadian administrative data), not a conflict. All three sources agree effects are effectively permanent for the most disadvantaged subgroups. Requires birthYear (to locate graduation year/macro conditions) and education (degree completion timing)."
+  },
+  {
+    "id": "origins.mobility",
+    "domain": "career",
+    "topic": "Childhood neighborhood exposure and adult income mobility",
+    "kind": "rate",
+    "statement": "A child's adult income outcomes converge toward their destination area's average at roughly 4% per year of childhood spent there (a causal \"exposure effect\"), so moving young to a higher-opportunity area raises lifetime earnings by about $302,000 per child moved at age 8 (~$99,000 in present value); experimentally, children who moved to a lower-poverty neighborhood before age 13 earned 31% (+$3,477/yr) more in their mid-twenties.",
+    "metric": {
+      "perYearConvergencePct": 4,
+      "mtoEarningsGainPct": 31,
+      "mtoEarningsGainUsdPerYear": 3477,
+      "mtoControlMeanUsdPerYear": 11270,
+      "mtoAgeCutoff": 13,
+      "lifetimeEarningsGainUsd": 302000,
+      "lifetimeEarningsGainPvUsd": 99000,
+      "avgMoveAge": 8,
+      "causalSharePct": 67
+    },
+    "conditioning": {
+      "comparison": "destination area average vs. origin",
+      "moveTiming": "younger moves yield larger gains; adolescent moves show slight disruption (negative) effects",
+      "causalSplitNote": "~two-thirds of cross-county variation is causal place effect, ~one-third is family sorting (softest figure)"
+    },
+    "provenance": "data",
+    "confidence": 0.9,
+    "source": {
+      "org": "Quarterly Journal of Economics / Opportunity Insights",
+      "title": "The Impacts of Neighborhoods on Intergenerational Mobility I: Childhood Exposure Effects (Chetty & Hendren); New Evidence from the Moving to Opportunity Experiment (Chetty, Hendren & Katz)",
+      "year": 2018,
+      "url": "https://opportunityinsights.org/paper/neighborhoodsi/"
+    },
+    "requires": [
+      "birthRegion",
+      "currentRegion",
+      "children"
+    ],
+    "note": "Confirmed across top-5 journals (QJE, AER) and experimentally validated by the randomized MTO voucher design. The 4%/yr exposure rate, +31%/$302k MTO/lifetime gains, and age-13 cutoff are independently confirmed and robust. Treat the \"~two-thirds causal vs. one-third sorting\" split as an approximate estimate (could not be re-verified to the exact fraction from accessible source text); point estimates carry confidence intervals and vary by specification."
+  },
+  {
+    "id": "children.adhd",
+    "domain": "children",
+    "topic": "ADHD prevalence and heritability in children",
+    "kind": "rate",
+    "statement": "Among US children aged 3-17, 11.4% have ever been diagnosed with ADHD (~7 million, about 1 in 9), with a strong sex skew (boys 15% vs. girls 8%) and rising with age (2.4% at 3-5, 11.5% at 6-11, 15.5% at 12-17); ADHD is among the most heritable psychiatric conditions, with twin-study heritability averaging ~74% (consensus 70-80%).",
+    "metric": {
+      "prevalencePct": 11.4,
+      "currentPrevalencePct": 10.5,
+      "prevalencePctBoys": 15,
+      "prevalencePctGirls": 8,
+      "prevalencePctAge3to5": 2.4,
+      "prevalencePctAge6to11": 11.5,
+      "prevalencePctAge12to17": 15.5,
+      "heritabilityPct": 74,
+      "heritabilityPctLo": 70,
+      "heritabilityPctHi": 80,
+      "affectedCountMillions": 7,
+      "ageLo": 3,
+      "ageHi": 17
+    },
+    "conditioning": {
+      "population": "US children",
+      "ageRange": "3-17",
+      "year": 2022,
+      "diagnosisType": "parent-reported ever-diagnosed (2022 NSCH)"
+    },
+    "provenance": "data",
+    "confidence": 0.95,
+    "source": {
+      "org": "CDC",
+      "title": "Data and Statistics on ADHD",
+      "year": 2022,
+      "url": "https://www.cdc.gov/adhd/data/index.html"
+    },
+    "requires": [
+      "children",
+      "familyHistory"
+    ],
+    "note": "Caveats (nuance, not contested): (1) prevalence is parent-reported diagnosis and reflects diagnosed cases; true prevalence by strict clinical criteria runs lower (~5-8%). (2) Twin-based heritability (~74%, Faraone & Larsson 2019, Molecular Psychiatry, https://www.nature.com/articles/s41380-018-0070-0; categorical/clinical estimates ~79-80%; clinical adult heritability ~0.72 per Larsson et al. 2013, Psychological Medicine, https://pmc.ncbi.nlm.nih.gov/articles/PMC4071160/) far exceeds SNP-based GWAS heritability (~14-22%), a known \"missing heritability\" gap attributed to rare variants; this does not undermine the twin-study consensus but should be flagged if used to imply specific genetic causation. (3) Heritability is a population statistic, not genetic determinism for any individual. Negligible shared-environment effect.",
+    "tags": [
+      "adhd",
+      "neurodevelopmental",
+      "heritability",
+      "prevalence",
+      "children",
+      "mental-health"
+    ]
+  },
+  {
+    "id": "children.autism",
+    "domain": "children",
+    "topic": "Autism spectrum disorder prevalence, sibling recurrence, and heritability",
+    "kind": "rate",
+    "statement": "As of 2022 US surveillance, autism spectrum disorder is identified in 1 in 31 children (32.2 per 1,000; boys ~1 in 20, girls ~1 in 70, a 3.4:1 male-to-female ratio); a younger sibling of an affected child has about a 20% chance of being diagnosed by age 3 (~7x the population baseline), and twin studies estimate heritability at 64-91%.",
+    "metric": {
+      "prevalencePct": 3.22,
+      "prevalenceBoysPct": 4.92,
+      "prevalenceGirlsPct": 1.43,
+      "maleToFemaleRatio": 3.4,
+      "recurrencePct": 20.2,
+      "recurrenceRelativeRisk": 7,
+      "heritabilityLoPct": 64,
+      "heritabilityHiPct": 91,
+      "surveillanceAge": 8
+    },
+    "conditioning": {
+      "region": "United States",
+      "surveillanceYear": 2022,
+      "ascertainment": "identified/diagnosed cases; long-term rise driven substantially by broadened criteria, awareness, and ascertainment",
+      "recurrenceMethod": "~20% prospective cohorts vs ~7-10% population-register",
+      "recurrencePredictors": "male sex, >1 affected older sibling"
+    },
+    "provenance": "data",
+    "confidence": 0.96,
+    "source": {
+      "org": "CDC (MMWR Surveillance Summaries)",
+      "title": "Prevalence and Early Identification of ASD Among Children Aged 4 and 8 Years — ADDM Network, 16 Sites, US, 2022",
+      "year": 2025,
+      "url": "https://www.cdc.gov/mmwr/volumes/74/ss/ss7402a1.htm"
+    },
+    "requires": [
+      "children",
+      "sex",
+      "familyHistory"
+    ],
+    "note": "Prevalence 1 in 31 (32.2/1,000) up from 1 in 36 (2020) and 4.8x the first ADDM report (1 in 150); M:F ratio is narrowing (4.2 to 3.4) but the absolute boy-girl gap is widening. Sibling recurrence is method-dependent: 20.2% prospective (Ozonoff et al., Pediatrics 2024;154(2):e2023065297, BSRC, n=1,605) vs ~7-10% population-register. Heritability 64-91% from twin meta-analysis (Tick et al., J Child Psychol Psychiatry 2016;57(5):585-595; MZ correlation ~0.98, DZ 0.53-0.67; shared-environment contribution modest). All figures trace to mainstream primary sources."
+  },
+  {
     "id": "children.grandparenthood-age",
     "domain": "children",
     "topic": "Age at first grandchild (US)",
@@ -201,6 +360,47 @@ export const RESEARCHED_FACTS = [
       "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6667684/"
     },
     "note": "The study stratifies by sex and race (not sex/education). The popular \"47 average\" and \"median 50 women / 54 men\" figures and the \"37% in 40s / 43% in 50s\" distribution are not backed by a rigorous primary source (only unattributed secondary content) and should be treated as low-confidence; the rigorous cohort estimate puts men closer to ~51."
+  },
+  {
+    "id": "children.intergenerational",
+    "domain": "children",
+    "topic": "Intergenerational transmission of income and education",
+    "kind": "gradient",
+    "statement": "A child's adult economic and educational standing is strongly tied to their parents': in the US a 10-percentile rise in parental income rank predicts a ~3.4-percentile rise in the child's adult income rank (rank-rank slope ≈ 0.34), the income intergenerational elasticity (IGE) sits in a method-sensitive ~0.4–0.6 range, education elasticities run ~0.2–0.45, and decompositions attribute roughly 1/6 of the parental-education effect to genetics and ~5/6 to social/environmental factors.",
+    "metric": {
+      "rankRankSlope": 0.34,
+      "igeLo": 0.4,
+      "igeHi": 0.6,
+      "educationElasticityLo": 0.2,
+      "educationElasticityHi": 0.45,
+      "geneticSharePct": 17,
+      "socialSharePct": 83
+    },
+    "conditioning": {
+      "region": "US national headline (rank-rank); US/UK typical (education elasticities)"
+    },
+    "provenance": "data",
+    "confidence": 0.9,
+    "source": {
+      "org": "Quarterly Journal of Economics / NBER (Chetty, Hendren, Kline & Saez)",
+      "title": "Where is the Land of Opportunity? The Geography of Intergenerational Mobility in the United States",
+      "year": 2014,
+      "url": "https://www.nber.org/system/files/working_papers/w19843/w19843.pdf"
+    },
+    "requires": [
+      "children",
+      "parents"
+    ],
+    "tags": [
+      "intergenerational-mobility",
+      "income",
+      "education",
+      "rank-rank",
+      "IGE",
+      "heritability",
+      "social-mobility"
+    ],
+    "note": "Rank-rank slope 0.34 is rock-solid (directly confirmed in Chetty et al. 2014). Present IGE as a method-sensitive range (~0.4–0.6), not a point estimate: older studies ~0.2, Solon/Zimmerman 1992 ~0.4, Mazumder 2005 and lifecycle-corrected work ~0.5–0.6. Education elasticities ~0.2–0.45 confirmed via the 2018 Education Economics meta-regression (Engzell & Tropf). The specific US \"0.59 SD years-of-schooling gap\" figure could not be independently re-verified (paywalled, HTTP 403) — flag before publishing. The ~1/6 genetic, ~5/6 social decomposition comes from one sociological-genomics literature strand (Conley et al. 2015, Sociological Science) — cite cautiously. Supporting sources: Opportunity Insights (https://opportunityinsights.org/); Engzell & Tropf, Education Economics 26(6), 2018 (https://www.tandfonline.com/doi/abs/10.1080/09645292.2018.1517863); Conley et al. 2015, Sociological Science 2 (https://sociologicalscience.com/articles-vol2-6-82/)."
   },
   {
     "id": "children.number",
@@ -877,6 +1077,193 @@ export const RESEARCHED_FACTS = [
     "note": "Prevalence/gender-gap figures verbatim-match the primary Census source (based on 2016 ACS + 2014 SIPP), confidence 0.88. The widely circulated \"average widowhood age 59 / median 59.4 (first marriage) / 60.3 (second marriage)\" figure, attributed to \"U.S. Census Bureau, 2011,\" has no locatable primary Census publication and should not be presented as a sourced Census statistic (confidence ~0.40); it is omitted from the metric here. No correction needed to prevalence figures."
   },
   {
+    "id": "behavior.activity",
+    "domain": "self",
+    "topic": "Physical activity and longevity",
+    "kind": "gradient",
+    "statement": "Meeting recommended physical activity (~150 min/wk moderate or 75 min/wk vigorous) is associated with about 3.4 more years of life expectancy versus inactivity; half the recommended dose adds ~1.8 years and twice the dose ~4.2 years (max observed ~4.5), while being obese and inactive is linked to ~5-7 fewer years than being normal-weight and active.",
+    "metric": {
+      "deltaYearsRecommended": 3.4,
+      "deltaYearsHalfDose": 1.8,
+      "deltaYearsDoubleDose": 4.2,
+      "deltaYearsMax": 4.5,
+      "deltaYearsObeseInactiveLo": -7,
+      "deltaYearsObeseInactiveHi": -5,
+      "consensusDeltaYearsLo": 3,
+      "consensusDeltaYearsHi": 4.5
+    },
+    "conditioning": {
+      "activityDose": "recommended (~150 min/wk moderate or 75 min/wk vigorous), referenced against inactivity",
+      "cohortSize": 654827,
+      "deaths": 82465
+    },
+    "provenance": "data",
+    "confidence": 0.9,
+    "source": {
+      "org": "PLOS Medicine (National Cancer Institute/NIH)",
+      "title": "Leisure Time Physical Activity of Moderate to Vigorous Intensity and Mortality: A Large Pooled Cohort Analysis",
+      "year": 2012,
+      "url": "https://journals.plos.org/plosmedicine/article?id=10.1371%2Fjournal.pmed.1001335"
+    },
+    "requires": [],
+    "note": "Headline figures (3.4 / 1.8 / 4.2 / 5-7 years) verified verbatim against the NIH/NCI press release; six pooled cohorts of 654,827 adults with ~82,465 deaths. Independently corroborated by a UK Biobank study (3.88 and 4.51 life-years gained at moderate/high objectively measured activity). Broader literature spans ~0.4-7 years depending on dose and whether body weight is combined; \"about 3 to 4.5 years\" is the defensible headline. Effect is dose-dependent rather than a single fixed constant.",
+    "tags": [
+      "physical-activity",
+      "exercise",
+      "longevity",
+      "life-expectancy",
+      "mortality",
+      "obesity",
+      "dose-response"
+    ]
+  },
+  {
+    "id": "behavior.alcohol",
+    "domain": "self",
+    "topic": "Alcohol consumption and life expectancy",
+    "kind": "gradient",
+    "statement": "All-cause mortality risk is lowest at or below ~100 g alcohol/week (~5 standard drinks); relative to that threshold, a 40-year-old loses roughly 6 months of life expectancy at 100-200 g/week, 1-2 years at 200-350 g/week, and 4-5 years above 350 g/week, with each additional 100 g/week raising risk of stroke (HR 1.14), fatal hypertensive disease (HR 1.24), and heart failure (HR 1.09) while modestly lowering myocardial infarction risk (HR 0.94).",
+    "metric": {
+      "thresholdGramsPerWeek": 100,
+      "deltaYears100to200": -0.5,
+      "deltaYears200to350": -1.5,
+      "deltaYears350plus": -4.5,
+      "hrStrokePer100g": 1.14,
+      "hrHypertensivePer100g": 1.24,
+      "hrHeartFailurePer100g": 1.09,
+      "hrMyocardialInfarctionPer100g": 0.94,
+      "nDrinkers": 599912,
+      "nStudies": 83,
+      "nDeaths": 40310,
+      "referenceAge": 40
+    },
+    "conditioning": {
+      "appliesTo": "current drinkers",
+      "referenceAge": 40,
+      "drinkSizeNote": "100 g/week ~5 standard drinks; years-lost figures depend on drink-size definition (UK unit=8g, US standard=14g)"
+    },
+    "provenance": "data",
+    "confidence": 0.92,
+    "source": {
+      "org": "The Lancet",
+      "title": "Risk thresholds for alcohol consumption: combined analysis of individual-participant data for 599 912 current drinkers in 83 prospective studies",
+      "year": 2018,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/29676281/"
+    },
+    "note": "Combined analysis of 599,912 current drinkers across 83 prospective studies (5.4M person-years, 40,310 deaths); every cited number matches the primary Lancet source exactly. This is mainstream consensus on heavy-drinking harm, not a single weak study. Important caveat: the apparent low-dose protective (\"J-curve\") effect, including the MI HR<1, is widely contested — recent Mendelian-randomization work (Kember et al. 2024) finds a positive linear mortality association with no protective tail, and the apparent benefit is attributed to sick-quitter/abstainer-reference confounding. Do not over-claim any protective effect at low intake. Years-lost figures depend on drink-size convention: 350 g/week is ~17.5 drinks at the paper's ~20 g convention but ~25 drinks at the US 14 g standard.",
+    "requires": [
+      "conditions"
+    ],
+    "tags": [
+      "alcohol",
+      "mortality",
+      "life-expectancy",
+      "cardiovascular",
+      "lifestyle"
+    ]
+  },
+  {
+    "id": "behavior.loneliness",
+    "domain": "self",
+    "topic": "Loneliness and social isolation as mortality risk factors",
+    "kind": "risk",
+    "statement": "Social isolation, loneliness, and living alone each raise mortality risk by roughly 25-35% (Holt-Lunstad 2015: odds ratios of 1.29, 1.26, and 1.32 across 70 studies and ~3.4M people), equivalently a 50% greater odds of survival for people with strong social relationships (Holt-Lunstad 2010: OR 1.50, 95% CI 1.42-1.59, 148 studies, 308,849 people).",
+    "metric": {
+      "oddsRatioIsolation": 1.29,
+      "oddsRatioLoneliness": 1.26,
+      "oddsRatioLivingAlone": 1.32,
+      "mortalityRiskLoPct": 25,
+      "mortalityRiskHiPct": 35,
+      "survivalOddsRatio": 1.5,
+      "survivalOddsRatioCiLo": 1.42,
+      "survivalOddsRatioCiHi": 1.59
+    },
+    "conditioning": {
+      "strongerEffectIf": "average sample age under 65",
+      "consistentAcross": "gender, follow-up length, world region",
+      "attenuatedBy": "strongest confounder control"
+    },
+    "provenance": "data",
+    "confidence": 0.97,
+    "source": {
+      "org": "Perspectives on Psychological Science (SAGE)",
+      "title": "Loneliness and Social Isolation as Risk Factors for Mortality: A Meta-Analytic Review (Holt-Lunstad et al.)",
+      "year": 2015,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/25910392/"
+    },
+    "requires": [
+      "partner",
+      "children",
+      "parents"
+    ],
+    "note": "Two confirmed meta-analyses. The 2015 figures (OR 1.29 isolation / 1.26 loneliness / 1.32 living alone) and the 2010 figure (survival OR 1.50, CI 1.42-1.59, the source of the \"comparable to smoking\" framing) appear verbatim across primary records (PubMed/PMC) and publishers (SAGE, PLOS). The 2010 1.50 is the protective survival odds, not a mortality OR, so it is framed as a survival benefit. Present ranges (~25-35% increased mortality risk) rather than single point estimates, since effect sizes attenuate somewhat under the strongest confounder control. Mainstream, heavily cited science.",
+    "tags": [
+      "loneliness",
+      "social-isolation",
+      "mortality",
+      "meta-analysis",
+      "social-relationships",
+      "living-alone"
+    ]
+  },
+  {
+    "id": "behavior.obesity",
+    "domain": "self",
+    "topic": "Years of life lost with obesity, by class",
+    "kind": "gradient",
+    "statement": "Relative to a healthy weight (BMI 18.5-24.9), obesity shortens life in proportion to severity: class I (BMI 30-34.9) loses roughly 2-4 years, class II (BMI 35-39.9) about 4-8 years, and class III ranges from 6.5 years at BMI 40-44.9 up to 13.7 years at BMI 55-59.9; all-cause mortality rises about 31% per 5 kg/m2 above BMI 25 (HR 1.45 grade 1, 1.94 grade 2, 2.76 grade 3), with larger effects in men (HR 1.51 vs 1.30) and at younger ages (1.52 at 35-49 vs 1.21 at 70-89).",
+    "metric": {
+      "deltaYearsClass1Lo": 2,
+      "deltaYearsClass1Hi": 4,
+      "deltaYearsClass2Lo": 4,
+      "deltaYearsClass2Hi": 8,
+      "deltaYearsClass3Bmi40": 6.5,
+      "deltaYearsClass3Bmi45": 8.9,
+      "deltaYearsClass3Bmi50": 9.8,
+      "deltaYearsClass3Bmi55": 13.7,
+      "deltaYearsObeseMenFrom40": 4.2,
+      "deltaYearsObeseWomenFrom40": 3.5,
+      "deltaYearsClass3MenFrom40": 9.1,
+      "deltaYearsClass3WomenFrom40": 7.7,
+      "hazardRatioPer5Bmi": 1.31,
+      "hazardRatioGrade1": 1.45,
+      "hazardRatioGrade2": 1.94,
+      "hazardRatioGrade3": 2.76,
+      "hazardRatioMen": 1.51,
+      "hazardRatioWomen": 1.3,
+      "hazardRatioAge35to49": 1.52,
+      "hazardRatioAge70to89": 1.21
+    },
+    "conditioning": {
+      "referenceBMI": "18.5-24.9 (healthy weight)",
+      "hazardReference": "BMI 22.5-25 for grade-specific HRs",
+      "ageAnchor": "life-years-lost estimated from age 40",
+      "regionalHRRange": "1.29 (North America) to 1.39 (Europe/East Asia)",
+      "caveat": "class I/II year figures are approximate consensus ranges; class I is attenuated in some analyses (obesity-paradox debate)"
+    },
+    "provenance": "data",
+    "confidence": 0.92,
+    "source": {
+      "org": "PLOS Medicine (Kitahara et al., pooled analysis of 20 prospective studies); corroborated by Bhaskaran et al. Lancet Diabetes & Endocrinol 2018 and the Global BMI Mortality Collaboration, Lancet 2016",
+      "title": "Association between Class III Obesity (BMI 40-59) and Mortality: A Pooled Analysis of 20 Prospective Studies",
+      "year": 2014,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4087039/"
+    },
+    "requires": [
+      "conditions",
+      "sex"
+    ],
+    "note": "Mainstream consensus, not a contested or single-study claim. Class III figures verified to the digit against PLOS Medicine 2014 (BMI 40-44.9: 6.5 yrs CI 5.7-7.3; 45-49.9: 8.9 yrs CI 7.4-10.4; 50-54.9: 9.8 yrs CI 7.4-12.2; 55-59.9: 13.7 yrs CI 10.5-16.9); above BMI 50 the loss (9.8 yrs) exceeds current-vs-never smoking (8.9 yrs) in that study. Bhaskaran 2018 (n=3.6M, from age 40): overall obese 4.2 yrs men / 3.5 yrs women; class 3 9.1 yrs men / 7.7 yrs women. Global BMI Collaboration 2016: HR 1.31 per 5 kg/m2. Class I/II single-year figures are approximate ranges that vary by source/sex/age/smoking adjustment; direction and magnitude undisputed by major health bodies. NCI press release (2014): https://www.cancer.gov/news-events/press-releases/2014/classobesity. requires conditions (obesity/BMI status) and sex (men show larger losses and HRs).",
+    "tags": [
+      "obesity",
+      "BMI",
+      "mortality",
+      "life-expectancy",
+      "years-of-life-lost",
+      "all-cause-mortality"
+    ]
+  },
+  {
     "id": "health.bone.peak",
     "domain": "self",
     "topic": "Bone mass over the lifespan",
@@ -1313,6 +1700,481 @@ export const RESEARCHED_FACTS = [
       "url": "https://www.ahajournals.org/doi/10.1161/circulationaha.105.545459"
     },
     "note": "Endpoint figures (3-6% per decade in 20s/30s, >20% per decade in 70s+, larger decline in men from 40s on, accelerating/curvilinear not constant) are verbatim from the source abstract. Intermediate per-decade values for the 40s/50s/60s and the \"~25% per decade in older men\" figure are interpolated/derived, not stated explicitly in the abstract, and should be treated as approximate. Sample: 810 adults (375 women, 435 men), ages 21-87. DOI: 10.1161/CIRCULATIONAHA.105.545459; abstract: https://pubmed.ncbi.nlm.nih.gov/16043637/"
+  },
+  {
+    "id": "heritability.addiction",
+    "domain": "self",
+    "topic": "Heritability of alcohol/substance use disorder",
+    "kind": "risk",
+    "statement": "Alcohol use disorder is roughly 49% heritable (95% CI 0.43–0.53) with substance use disorders broadly ~50% genetic, and children of a parent with AUD carry about 2–4x the general-population risk though fewer than half develop it.",
+    "metric": {
+      "heritabilityPct": 49,
+      "heritabilityLoPct": 43,
+      "heritabilityHiPct": 53,
+      "relativeRiskLo": 2,
+      "relativeRiskHi": 4
+    },
+    "conditioning": {
+      "disorder": "alcohol/substance use disorder",
+      "consensusRangePct": "40-60",
+      "bySubstanceRangePct": "30-80"
+    },
+    "provenance": "data",
+    "confidence": 0.92,
+    "requires": [
+      "familyHistory"
+    ],
+    "source": {
+      "org": "Psychological Medicine (Verhulst, Neale & Kendler)",
+      "title": "The heritability of alcohol use disorders: a meta-analysis of twin and adoption studies",
+      "year": 2015,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/25171596/"
+    },
+    "tags": [
+      "addiction",
+      "alcohol",
+      "heritability",
+      "genetics",
+      "familyHistory",
+      "twinStudies"
+    ],
+    "note": "Meta-analysis of 12 twin + 5 adoption studies; AUD h²≈0.49 (95% CI 0.43–0.53). Remaining variance is environmental, splitting into a small but statistically significant shared-environment component (c²≈0.10, 95% CI 0.03–0.16) plus a larger non-shared/unique-environment component. Consensus range commonly stated ~50% (40–60%); by-substance genetic contribution ranges ~30–80% (nicotine/cocaine high, hallucinogens low). NIAAA confirms 2–4x family-history risk and ~50–60% range; fewer than half of children of an affected parent develop AUD. Family-history multiplier varies by population/severity."
+  },
+  {
+    "id": "heritability.alzheimers",
+    "domain": "self",
+    "topic": "Family history of Alzheimer's disease",
+    "kind": "risk",
+    "statement": "Having one affected first-degree relative raises Alzheimer's disease relative risk to 1.73 (95% CI 1.59-1.87) — roughly doubling lifetime risk per mainstream consensus — with a robust dose-response (two FDRs RR 3.98, four FDRs RR 14.77).",
+    "metric": {
+      "relativeRisk": 1.73,
+      "ciLo": 1.59,
+      "ciHi": 1.87,
+      "relativeRiskTwoFDR": 3.98,
+      "relativeRiskFourFDR": 14.77
+    },
+    "conditioning": {
+      "affectedFirstDegreeRelatives": 1,
+      "doseResponse": "RR rises with number of affected FDRs",
+      "cohort": "Utah, largely white European ancestry"
+    },
+    "provenance": "data",
+    "confidence": 0.88,
+    "source": {
+      "org": "Neurology (Cannon-Albright LA, et al.)",
+      "title": "Relative risk for Alzheimer disease based on complete family history",
+      "year": 2019,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6511086/"
+    },
+    "requires": [
+      "familyHistory"
+    ],
+    "note": "Genealogical relative risk, not absolute lifetime percentage; absolute risk also depends heavily on APOE genotype and age. Exact RRs derive from a single largely white European-ancestry Utah cohort, so the precise figures aren't universal even though the ~1.5x-2x direction is corroborated by NIA, Alzheimer's Association, Mayo Clinic, and Cedars-Sinai. Parent-of-origin breakdown (father RR 2.54 vs. mother RR 1.72) is suggestive only — not consistently statistically significant and contested in the broader literature."
+  },
+  {
+    "id": "heritability.breast-cancer",
+    "domain": "self",
+    "topic": "Breast cancer risk from family history",
+    "kind": "risk",
+    "statement": "Having one affected first-degree relative (mother, sister, or daughter) roughly doubles breast cancer risk (RR 1.80, 99% CI 1.69-1.91); two affected relatives raise it ~3-fold (RR 2.93) and three or more ~4-fold (RR 3.90), translating to a lifetime risk rising from ~7.8% with no affected relative to ~13.3% with one and ~21.1% with two.",
+    "metric": {
+      "relativeRiskOne": 1.8,
+      "relativeRiskOneLo": 1.69,
+      "relativeRiskOneHi": 1.91,
+      "relativeRiskTwo": 2.93,
+      "relativeRiskTwoLo": 2.36,
+      "relativeRiskTwoHi": 3.64,
+      "relativeRiskThreePlus": 3.9,
+      "relativeRiskThreePlusLo": 2.03,
+      "relativeRiskThreePlusHi": 7.49,
+      "pooledRelativeRiskOne": 2.1,
+      "lifetimeRiskNoRelativePct": 7.8,
+      "lifetimeRiskOneRelativePct": 13.3,
+      "lifetimeRiskTwoRelativesPct": 21.1,
+      "baselineLifetimeRiskPct": 13
+    },
+    "conditioning": {
+      "relativeType": "first-degree (mother, sister, daughter)",
+      "outcome": "breast cancer",
+      "region": "developed countries",
+      "ageHorizon": "cumulative incidence by age 80"
+    },
+    "provenance": "data",
+    "confidence": 0.97,
+    "requires": [
+      "familyHistory",
+      "sex"
+    ],
+    "source": {
+      "org": "Collaborative Group on Hormonal Factors in Breast Cancer",
+      "title": "Familial breast cancer: collaborative reanalysis of individual data from 52 epidemiological studies including 58,209 women with breast cancer and 101,986 women without the disease",
+      "year": 2001,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/11705483/"
+    },
+    "note": "Confirmed and mainstream. The Lancet 2001 reanalysis (52 studies, 160k+ women) supports the relative-risk figures verbatim against the PubMed abstract; Pharoah 1997 meta-analysis (74 studies) independently pooled RR 2.1 for one first-degree relative; \"doubled with one, ~5-fold with two\" framing is corroborated by Cancer Research UK, breastcancer.org, and Susan G. Komen. Standard caveat: this is a relative, not absolute, increase, and most women with an affected first-degree relative never develop breast cancer."
+  },
+  {
+    "id": "heritability.colorectal-cancer",
+    "domain": "self",
+    "topic": "Colorectal cancer risk with family history (one affected first-degree relative)",
+    "kind": "risk",
+    "statement": "Having one affected first-degree relative roughly doubles colorectal cancer risk (pooled relative risk ~2.2, with NCI PDQ citing RR 2.25 [95% CI 2.00-2.53] and the Butterworth meta-analysis RR 2.24 [95% CI 2.06-2.43]), placing first-degree relatives at a twofold-to-threefold increased risk.",
+    "metric": {
+      "relativeRisk": 2.24,
+      "relativeRiskCiLo": 2.06,
+      "relativeRiskCiHi": 2.43,
+      "relativeRiskNci": 2.25,
+      "relativeRiskColon": 2.42,
+      "relativeRiskRectal": 1.89,
+      "relativeRiskTwoOrMoreRelatives": 3.97
+    },
+    "conditioning": {
+      "affectedFirstDegreeRelatives": 1,
+      "cancerSite": "colorectal",
+      "note": "RR ~3.97 (2.60-6.06) with two or more affected relatives; risk especially elevated if relative diagnosed before age 55"
+    },
+    "provenance": "data",
+    "confidence": 0.97,
+    "source": {
+      "org": "National Cancer Institute",
+      "title": "Colorectal Cancer Prevention (PDQ) - Health Professional Version",
+      "year": 2024,
+      "url": "https://www.cancer.gov/types/colorectal/hp/colorectal-prevention-pdq"
+    },
+    "requires": [
+      "familyHistory"
+    ],
+    "note": "Mainstream and uncontested, corroborated by three independent meta-analyses (Butterworth 2006: 47 studies, RR 2.24; NCI PDQ: RR 2.25; Mehraban Far 2019: RR 1.87). Caveat: cohort-design estimates trend lower (~1.4-1.9) than case-control (~2.2-2.4), so \"roughly doubled / ~2-fold\" is the firm consensus rather than a single precise point estimate.",
+    "tags": [
+      "colorectal-cancer",
+      "family-history",
+      "first-degree-relative",
+      "heritability",
+      "relative-risk"
+    ]
+  },
+  {
+    "id": "heritability.depression",
+    "domain": "self",
+    "topic": "Heritability and familial risk of major depression",
+    "kind": "risk",
+    "statement": "Major depression is roughly 37% heritable (95% CI 31-42%; higher in women ~40-42% vs men ~29-30%), and having a first-degree relative with depression raises your risk about 2- to 3-fold (pooled OR 2.84).",
+    "metric": {
+      "heritabilityPct": 37,
+      "heritabilityPctLo": 31,
+      "heritabilityPctHi": 42,
+      "heritabilityPctWomen": 41,
+      "heritabilityPctMen": 30,
+      "oddsRatio": 2.84,
+      "relativeRisk": 2.5
+    },
+    "conditioning": {
+      "populationBasis": "twin and family studies",
+      "snpBasedHeritabilityPct": 9
+    },
+    "requires": [
+      "familyHistory",
+      "sex"
+    ],
+    "provenance": "data",
+    "confidence": 0.93,
+    "source": {
+      "org": "American Journal of Psychiatry",
+      "title": "Genetic Epidemiology of Major Depression: Review and Meta-Analysis",
+      "year": 2000,
+      "url": "https://psychiatryonline.org/doi/full/10.1176/appi.ajp.157.10.1552"
+    },
+    "note": "Sullivan, Neale & Kendler 2000 meta-analysis: twin-based additive genetic heritability ~37% (shared environment ~0%, individual-specific environment/error ~63%); pooled OR 2.84 in first-degree relatives. Sex difference confirmed (higher in women). Familial risk replicated by Wilde et al. 2014 (J Affect Disord; OR 2.14, 95% CI 1.72-2.67 for one affected proband, rising to ~3.23 with multiple affected relatives). Standard caveat: twin-based heritability (~37%) exceeds SNP/GWAS-based estimates (~9%) — the known \"missing heritability\" gap. Consensus literature range 30-40%. Mainstream and replicated for 20+ years.",
+    "tags": [
+      "depression",
+      "heritability",
+      "family-history",
+      "genetics",
+      "twin-study",
+      "MDD"
+    ]
+  },
+  {
+    "id": "heritability.diabetes",
+    "domain": "self",
+    "topic": "Family history of type 2 diabetes",
+    "kind": "risk",
+    "statement": "Having one biological parent (or one affected first-degree relative) with type 2 diabetes roughly doubles your risk (RR ~1.76) and raises lifetime risk to about 40%, while having both parents (or 2+ affected first-degree relatives) raises relative risk to about 3x (RR ~3.31) and lifetime risk to about 70%.",
+    "metric": {
+      "relativeRiskOneParent": 1.76,
+      "relativeRiskBothParents": 3.31,
+      "lifetimeRiskOneParentPct": 40,
+      "lifetimeRiskBothParentsPct": 70
+    },
+    "conditioning": {
+      "familyHistoryOf": "type2diabetes",
+      "oneParentRR_CI": "1.70-1.83",
+      "bothParentsRR_CI": "3.16-3.48",
+      "bothParentsProxy": "2+ affected first-degree relatives; some sources cite up to ~6x for both parents"
+    },
+    "provenance": "data",
+    "confidence": 0.85,
+    "requires": [
+      "familyHistory"
+    ],
+    "source": {
+      "org": "Liu et al. (PMC) / Cleveland Clinic",
+      "title": "Family history of type 2 diabetes and the risk of type 2 diabetes among young and middle-aged adults (cohort n≈375,724); Cleveland Clinic, Type 2 Diabetes health library",
+      "year": 2025,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11880113/"
+    },
+    "note": "Relative-risk figures from Liu et al. 2025 cohort (n≈375,724): RR 1.76 (95% CI 1.70-1.83) for one affected first-degree relative; RR 3.31 (95% CI 3.16-3.48) for 2+ affected first-degree relatives, verified verbatim. Lifetime 40%/70% figures from Cleveland Clinic (https://my.clevelandclinic.org/health/diseases/21501-type-2-diabetes): \"Your lifetime risk of developing T2D is 40% if you have one biological parent with T2D. It's 70% if both of your biological parents have it.\" Caveat 1: the 3.31 figure is \"2+ affected first-degree relatives\" (parents + siblings), a close proxy for \"both parents,\" not an exact both-parents estimate; some sources cite up to ~6x, so ~3x is a conservative central value. Caveat 2: maternal-vs-paternal transmission asymmetry is real but inconsistent across studies (directionally noted, not settled)."
+  },
+  {
+    "id": "heritability.heart-disease",
+    "domain": "self",
+    "topic": "Family history of coronary heart disease",
+    "kind": "risk",
+    "statement": "A first-degree family history of myocardial infarction roughly doubles your own CHD/MI risk (~1.5–2x, independent of other risk factors; pooled RR 1.60), with a clear dose-response: 1 affected relative IRR 1.46, 2 relatives 2.38, and 3+ relatives 3.58.",
+    "metric": {
+      "relativeRisk": 1.6,
+      "relativeRiskLo": 1.44,
+      "relativeRiskHi": 1.77,
+      "irr1Relative": 1.46,
+      "irr2Relatives": 2.38,
+      "irr3PlusRelatives": 3.58,
+      "rrRangeLo": 1.5,
+      "rrRangeHi": 2
+    },
+    "conditioning": {
+      "relativeDegree": "first-degree",
+      "outcome": "coronary heart disease / myocardial infarction",
+      "independentOfOtherRiskFactors": true,
+      "doseResponse": true,
+      "prematureParentalOnsetRaisesRiskFurther": true
+    },
+    "provenance": "data",
+    "confidence": 0.9,
+    "requires": [
+      "familyHistory"
+    ],
+    "source": {
+      "org": "PLOS ONE",
+      "title": "A Detailed Family History of Myocardial Infarction and Risk of Myocardial Infarction – A Nationwide Cohort Study (Ranthe et al.)",
+      "year": 2015,
+      "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0125896"
+    },
+    "tags": [
+      "heredity",
+      "cardiovascular",
+      "coronary-heart-disease",
+      "myocardial-infarction",
+      "family-history",
+      "dose-response"
+    ],
+    "note": "Mainstream consensus across multiple large independent datasets (Danish ~4.4M-person nationwide cohort, INTERHEART ~30k across 52 countries, Framingham, plus a meta-analysis) converging on ~1.5–2x RR with a clear dose-response. Pooled RR 1.60 (95% CI 1.44–1.77) comes from 12 case-control studies (per MDPI/JCM 2024 review, PMC11477357), not cohort studies. Danish cohort dose-response (Ranthe 2015): 1 first-degree relative IRR 1.46 (1.42–1.49), 2 relatives 2.38 (2.22–2.56), ≥3 relatives 3.58 (2.66–4.81). INTERHEART (Chow et al., JACC 2011) shows premature parental onset raises risk further (both parents with MI, one before 50 → OR 3.26; both premature → OR 6.56 with very wide CI 1.39–30.95). The 'shifts onset earlier' effect is directionally well-supported but not quantified as a canonical 'X years earlier' figure; the eye-catching 6.56 / ~10-fold extremes rest on small subgroups with wide CIs and should not be presented as central estimates. The robust, defensible headline is ~1.5–2x."
+  },
+  {
+    "id": "heritability.longevity",
+    "domain": "self",
+    "topic": "Heritability of longevity",
+    "kind": "rate",
+    "statement": "About 20-25% of variation in human lifespan is heritable (twin-study estimates of 0.26 for men and 0.23 for women), with most longevity driven by environment, behavior, and chance; having a mother who lived to 90+ raises a woman's odds of healthy survival to 90 by roughly 25% (OR 1.25), and both parents reaching 90 by about 38% (OR 1.38).",
+    "metric": {
+      "heritabilityPct": 24,
+      "heritabilityLoPct": 15,
+      "heritabilityHiPct": 33,
+      "heritabilityMenPct": 26,
+      "heritabilityWomenPct": 23,
+      "oddsRatioMotherTo90": 1.25,
+      "oddsRatioMotherCiLo": 1.11,
+      "oddsRatioMotherCiHi": 1.42,
+      "oddsRatioBothParentsTo90": 1.38
+    },
+    "conditioning": {
+      "prediction": "parental longevity to 90+ predicting healthy survival to 90 measured in women (Women's Health Initiative, n=22,735)",
+      "note": "emerging non-consensus revision (Sarel et al. Science 2026) estimates intrinsic-lifespan heritability ~50% after separating intrinsic from extrinsic deaths; an opposing 2018 analysis argues assortative mating inflates classic estimates toward ~7-15%"
+    },
+    "provenance": "data",
+    "confidence": 0.88,
+    "requires": [
+      "familyHistory",
+      "parents",
+      "sex"
+    ],
+    "source": {
+      "org": "Human Genetics (Herskind et al.)",
+      "title": "The heritability of human longevity: a population-based study of 2872 Danish twin pairs born 1870-1900",
+      "year": 1996,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/8786073/"
+    },
+    "note": "Mainstream consensus: ~20-25% of lifespan variation is heritable (range ~15-33% across studies, clustering at 20-25%); most variation is non-genetic. Parental longevity is a modest-but-real predictor, not deterministic (Sun et al., Age and Ageing 2018, https://academic.oup.com/ageing/article/47/6/853/5067592). The ~25% figure is pressured in both directions: a Jan 2026 Science paper (Sarel et al., \"Heritability of intrinsic human life span is about 50%...\", https://www.science.org/doi/10.1126/science.adz1187) argues it is biased low (~50-54% when separating intrinsic from extrinsic deaths; single model-dependent study, confidence ~0.4), while a 2018 study (PMC6218226) argues assortative mating inflates it (true value perhaps ~7-15%). This two-sided uncertainty supports reporting ~20-25% as a central estimate with genuine uncertainty rather than a precise value. sex is required only for the female-specific parental-longevity prediction."
+  },
+  {
+    "id": "origins.aces",
+    "domain": "self",
+    "topic": "Adverse Childhood Experiences (ACEs) and premature mortality",
+    "kind": "gradient",
+    "statement": "In nationally representative U.S. data, 63.9% of adults report at least one adverse childhood experience and 17.3% report 4 or more (~1 in 6), and exposure follows a dose-response gradient: people with 6+ ACEs died on average nearly 20 years earlier (mean age 60.6 vs 79.1) and were 1.7x more likely to die by age 75 and 2.4x more likely to die by age 65.",
+    "metric": {
+      "prevalencePctAny": 63.9,
+      "prevalencePct4plus": 17.3,
+      "deltaYears": 18.5,
+      "meanAgeDeathHighExposure": 60.6,
+      "meanAgeDeathNoExposure": 79.1,
+      "yearsLifeLostHighExposure": 25.2,
+      "yearsLifeLostNoExposure": 9.2,
+      "relativeRiskDeathBy75": 1.7,
+      "relativeRiskDeathBy65": 2.4,
+      "acesThresholdHighExposure": 6
+    },
+    "conditioning": {
+      "appliesTo": "high-exposure tail (6+ ACEs) for mortality estimates; prevalence figures are population-wide",
+      "studyDesign": "observational cohort, associations adjusted but not causal"
+    },
+    "provenance": "data",
+    "confidence": 0.92,
+    "source": {
+      "org": "American Journal of Preventive Medicine (Brown et al.); CDC MMWR (Swedo et al.)",
+      "title": "Adverse Childhood Experiences and the Risk of Premature Mortality (2009); Prevalence of ACEs Among U.S. Adults — BRFSS 2011–2020 (2023)",
+      "year": 2009,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/19840693/"
+    },
+    "requires": [],
+    "note": "Two standing caveats: (1) the ~20-years-earlier death and 1.7x/2.4x relative risks apply to the high-exposure 6+ ACEs tail, not the average person with one ACE; (2) associations are observational, though the gradient is robust, biologically plausible (toxic stress), and replicated across independent cohorts and meta-analyses (e.g., Hughes et al., Lancet Public Health 2017). BRFSS national figures (63.9%/17.3%) preferred over the original CDC-Kaiser cohort for prevalence. Foundational: Felitti et al., 1998.",
+    "tags": [
+      "aces",
+      "childhood-adversity",
+      "mortality",
+      "toxic-stress",
+      "dose-response",
+      "public-health"
+    ]
+  },
+  {
+    "id": "origins.childhood-poverty",
+    "domain": "self",
+    "topic": "Childhood poverty and adult earnings, health, and life expectancy",
+    "kind": "gradient",
+    "statement": "Growing up in poverty lowers adult outcomes across earnings, health, and longevity: moving out of a high-poverty neighborhood before age 13 raised adult earnings by about 31% ($3,477/yr on a ~$11,270 base), poverty-linked adverse childhood experiences raise premature-mortality risk roughly 40-50% (HR ~1.41), and the extreme ACE-burden tail (6+ ACEs) is associated with dying about 19-20 years earlier and 54% higher mortality.",
+    "metric": {
+      "earningsGainPct": 31,
+      "earningsGainUSD": 3477,
+      "controlEarningsUSD": 11270,
+      "moverAgeThreshold": 13,
+      "prematureMortalityHR": 1.41,
+      "prematureMortalityHRLo": 1.24,
+      "prematureMortalityHRHi": 1.62,
+      "prematureMortalityElevationPctLo": 40,
+      "prematureMortalityElevationPctHi": 50,
+      "aceExtremeDeltaYearsLo": 19,
+      "aceExtremeDeltaYearsHi": 20,
+      "aceExtremeMortalityElevationPct": 54,
+      "aceExtremeAgeAtDeath": 60.6,
+      "comparisonAgeAtDeath": 79.1,
+      "aceExtremeThreshold": 6
+    },
+    "conditioning": {
+      "earnings": "MTO randomized place effect, movers before age 13; near-zero for teen movers",
+      "lifeExpectancy": "19-20 year figure is ACE-burden (6+ ACEs), NOT poverty alone; ACEs and poverty overlap but are distinct",
+      "prematureMortalityDoseResponse": "HR 1.14/1.44/1.54/1.74 for 1/2/3/>=4 ACEs"
+    },
+    "provenance": "data",
+    "confidence": 0.85,
+    "source": {
+      "org": "Opportunity Insights / Lancet Regional Health-Americas / Am J Prev Med (CDC)",
+      "title": "The Effects of Exposure to Better Neighborhoods on Children (Chetty, Hendren & Katz 2016); Adverse Childhood Experiences and Premature Mortality (Forrester et al. 2022); ACEs and Risk of Premature Mortality (Brown et al. 2009)",
+      "year": 2022,
+      "url": "https://opportunityinsights.org/paper/newmto/"
+    },
+    "requires": [
+      "birthRegion"
+    ],
+    "note": "Most common misuse risk is conflating the ACE-extreme ~20-year life-expectancy gap with poverty alone; frame ~20 years as ACE-burden and use the ~40-50% premature-mortality elevation (HR ~1.41) as the poverty-specific figure. Direction and existence of all three effects are firm mainstream consensus; precise effect sizes carry normal cohort/measurement variation.",
+    "tags": [
+      "childhood-poverty",
+      "ACEs",
+      "earnings",
+      "mortality",
+      "life-expectancy",
+      "neighborhood-effects",
+      "social-determinants"
+    ]
+  },
+  {
+    "id": "origins.county-le",
+    "domain": "self",
+    "topic": "Geographic inequality in US life expectancy (county and neighborhood)",
+    "kind": "gradient",
+    "statement": "US life expectancy varies by about 20 years between the longest-lived county (Summit County, CO, 86.8 yrs) and the shortest-lived (Oglala Lakota County/Pine Ridge, SD, 66.8 yrs), and within a single state the neighborhood (census-tract) gap reaches nearly 35 years (e.g., New York: 59.0 yrs on Roosevelt Island vs. 93.6 yrs in a Lower Manhattan/Chinatown tract).",
+    "metric": {
+      "deltaYearsCounty": 20.1,
+      "countyHigh": 86.8,
+      "countyLow": 66.8,
+      "deltaYearsTract": 34.6,
+      "tractHigh": 93.6,
+      "tractLow": 59
+    },
+    "conditioning": {
+      "geographicUnitCounty": "US county, IHME 2014",
+      "geographicUnitTract": "US census tract within a single state (New York), NCHS USALEEP 2010-2015"
+    },
+    "provenance": "data",
+    "confidence": 0.97,
+    "requires": [
+      "currentRegion"
+    ],
+    "source": {
+      "org": "IHME / JAMA Internal Medicine (Dwyer-Lindgren et al.); NCHS USALEEP",
+      "title": "Inequalities in Life Expectancy Among US Counties, 1980 to 2014; NCHS Census-Tract Life Expectancy (USALEEP), 2010-2015",
+      "year": 2017,
+      "url": "https://www.healthdata.org/news-events/newsroom/news-releases/growing-gap-between-longest-and-shortest-lifespans-us-emphasizes"
+    },
+    "note": "Always state the geographic unit: the ~20-year gap is county-level (IHME 2014; figures 86.8/86.5/85.9 high, 66.8 low reproduced verbatim across ScienceDaily, IHME, NIH Director's Blog, WEF), while the larger ~35-year gap is census-tract/neighborhood within a single state (NCHS USALEEP 2010-2015; NY 59.0 vs 93.6 confirmed by NY Health Foundation) — the two are not interchangeable. The 11.8-year average within-city figure (Journal of Urban Health, 2025) was not re-verified and should be dropped if precision matters. The 403 on the IHME URL is a bot-block only; claims confirmed via mirror sources."
+  },
+  {
+    "id": "origins.rural-urban",
+    "domain": "self",
+    "topic": "Rural vs. urban mortality and life expectancy gap",
+    "kind": "gradient",
+    "statement": "Living in a rural area carries a roughly 2–2.5 year life-expectancy disadvantage (2.48 yrs for women, 2.53 yrs for men in 2019) and an age-adjusted all-cause death rate about 20% higher than urban areas (834.0 vs 693.4 per 100,000 in 2019), with rural rates higher for all 10 leading causes of death.",
+    "metric": {
+      "deltaYears": -2.5,
+      "deltaYearsWomen": -2.48,
+      "deltaYearsMen": -2.53,
+      "allCauseDeathRateRuralPer100k": 834,
+      "allCauseDeathRateUrbanPer100k": 693.4,
+      "allCauseRelativeRisk": 1.2,
+      "heartDiseaseRuralPer100k": 189.1,
+      "heartDiseaseUrbanPer100k": 156.3,
+      "cancerRuralPer100k": 164.1,
+      "cancerUrbanPer100k": 142.8,
+      "clrdRuralPer100k": 52.5,
+      "clrdUrbanPer100k": 35.4,
+      "primeAgeNaturalCauseExcessPct": 43,
+      "year": 2019
+    },
+    "conditioning": {
+      "classification": "NCHS 2013 urban-rural scheme",
+      "ageRangePrimeWorking": "25-54",
+      "trend": "gap widened since ~1990; rural LE declined 2010-2019 while urban rose"
+    },
+    "provenance": "data",
+    "confidence": 0.95,
+    "source": {
+      "org": "CDC NCHS",
+      "title": "Trends in Death Rates in Urban and Rural Areas: United States, 1999–2019 (Data Brief No. 417)",
+      "year": 2021,
+      "url": "https://www.cdc.gov/nchs/products/databriefs/db417.htm"
+    },
+    "requires": [
+      "birthRegion",
+      "currentRegion"
+    ],
+    "note": "Confirmed against primary sources. LE gap from Cosby et al. (Int J Epidemiol, 2022, PMC8743112); all-cause and cause-specific rates verbatim from CDC NCHS Data Brief 417 (2021); USDA ERS EIB-265 \"The Nature of the Rural-Urban Mortality Gap\" is dated March 2024 (not 2023) — https://www.ers.usda.gov/publications/pub-details?pubid=108701. Prime working-age (25–54) natural-cause mortality ~43% higher in rural areas. Cite as ranges (LE gap ~2–2.5 yrs; all-cause mortality ~20% higher); classification per NCHS 2013 urban-rural scheme.",
+    "tags": [
+      "rural",
+      "urban",
+      "mortality",
+      "life-expectancy",
+      "geography",
+      "social-determinants"
+    ]
   },
   {
     "id": "reproductive.fertility.decline",

@@ -36,8 +36,14 @@ Query helpers: `getFact(id)`, `factsForDomain(domain)`, `factsByTag(tag)`, `cite
 
 ## Coverage
 
-**46 cited facts** across all six domains (self 21, career 6, children 6, partner 5, finances 4,
-parents 4), in two layers:
+**67 cited facts** across all six domains (self 37, career 8, children 9, partner 5, finances 4,
+parents 4), in two layers — and now spanning the deeper clusters: **genetics & family history**
+(heritability of heart disease, diabetes, breast/colorectal cancer, Alzheimer's, depression,
+addiction, longevity), **origins & place** (income mobility by childhood county, ACEs,
+childhood poverty, neighborhood life-expectancy gap, rural/urban, recession-cohort scarring),
+**behaviors** (alcohol, activity, obesity, social isolation), and **children's outcomes** (autism,
+ADHD, intergenerational transmission). Each carries `requires`, so adding it activated its question
+in onboarding automatically (5 → 11 active questions). The two layers:
 
 - **Seed** ([`corpus.js`](src/corpus/corpus.js)) — 14 hand-curated anchors (life table, smoking,
   education, muscle, menopause, cognition, peak earnings, retirement, first birth, leaving home…).
