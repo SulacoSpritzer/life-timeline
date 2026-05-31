@@ -22,7 +22,7 @@ export function mountTimeline(root, { profile, onEdit }) {
     items: run(profile, { disposition: disp }),
     byId: {}, span: { start: profile.birthYear, end: profile.birthYear + 93 },
     open: new Set(['self']), multi: false, selected: null,
-    firstPaint: true, reveal: new Set(),
+    firstPaint: true, reveal: new Set(), closing: new Set(),
   };
   let trackW = 900, yearW = 9;
   const x = (y) => PADL + (y - state.span.start) * yearW;
@@ -31,7 +31,7 @@ export function mountTimeline(root, { profile, onEdit }) {
   root.innerHTML = shell(profile);
   const $ = (s) => root.querySelector(s);
   const domainsEl = $('#tl-domains');
-  let tipEl = null, hoverId = null, hoverTimer = null;
+  let tipEl = null, hoverId = null, hoverTimer = null, animTimer = null;
 
   // Build the per-domain row skeleton once; paint() updates contents in place so the
   // height CSS transition has stable elements to animate.
@@ -68,16 +68,18 @@ export function mountTimeline(root, { profile, onEdit }) {
     for (const d of DOMAINS) {
       const di = state.items.filter((i) => i.dom === d.id);
       di.forEach((i) => (i._g = geom(i)));
-      const open = state.open.has(d.id);
-      const lanes = open ? (di.length ? pack(di) : 1) : 1;
-      const H = open ? Math.max(MIN_EXP_H, INPAD * 2 + lanes * laneH + (lanes - 1) * laneGap) : COLLAPSED_H;
+      const open = state.open.has(d.id), closing = state.closing.has(d.id), showExpanded = open || closing;
+      const lanes = showExpanded ? (di.length ? pack(di) : 1) : 1;
+      const expandedH = Math.max(MIN_EXP_H, INPAD * 2 + lanes * laneH + (lanes - 1) * laneGap);
+      const svgH = showExpanded ? expandedH : COLLAPSED_H;
+      const boxH = open ? expandedH : COLLAPSED_H; // closing: keep expanded content, clip to collapsed height → folds
       const row = domainsEl.querySelector(`.drow[data-dom="${d.id}"]`);
       const head = row.querySelector('.dhead'), body = row.querySelector('.dbody');
       const reveal = state.firstPaint || state.reveal.has(d.id);
       head.setAttribute('aria-expanded', open);
       head.innerHTML = headInner(d, open);
-      body.innerHTML = bodySVG(di, open, H, reveal);
-      body.style.height = H + 'px';
+      body.innerHTML = bodySVG(di, showExpanded, svgH, reveal);
+      body.style.height = boxH + 'px';
     }
     $('#tl-now').style.left = (GUT + x(NOW)) + 'px';
     if (state.selected && state.byId[state.selected]) markSelected(state.selected);
@@ -244,12 +246,26 @@ export function mountTimeline(root, { profile, onEdit }) {
   }
 
   /* ---------- interaction ---------- */
-  function animate(fn) { domainsEl.classList.add('animating'); fn(); setTimeout(() => domainsEl.classList.remove('animating'), 480); }
+  function animate(fn) {
+    clearTimeout(animTimer);
+    domainsEl.classList.add('animating');
+    fn();
+    animTimer = setTimeout(() => {
+      domainsEl.classList.remove('animating');
+      if (state.closing.size) { // closing domains folded to collapsed height; now settle into their summary strip
+        const doms = [...state.closing];
+        state.closing = new Set();
+        paint();
+        for (const id of doms) { const b = domainsEl.querySelector(`.drow[data-dom="${id}"] .dbody`); if (b) { b.classList.add('settle'); setTimeout(() => b.classList.remove('settle'), 340); } }
+      }
+    }, 460);
+  }
   function toggle(id) {
-    const wasOpen = state.open.has(id);
-    if (wasOpen) state.open.delete(id);
-    else { if (!state.multi) state.open.clear(); state.open.add(id); }
+    const wasOpen = state.open.has(id), closing = new Set();
+    if (wasOpen) { state.open.delete(id); closing.add(id); }
+    else { if (!state.multi) { for (const o of state.open) closing.add(o); state.open.clear(); } state.open.add(id); }
     state.reveal = wasOpen ? new Set() : new Set([id]);
+    state.closing = closing;
     animate(() => paint());
   }
 
@@ -308,8 +324,8 @@ export function mountTimeline(root, { profile, onEdit }) {
   });
   $('#tl-acts').addEventListener('click', (e) => {
     const b = e.target.closest('[data-act]'); if (!b) return;
-    if (b.dataset.act === 'open') { state.multi = true; state.reveal = new Set([...DOMAINS.map((d) => d.id)].filter((id) => !state.open.has(id))); state.open = new Set(DOMAINS.map((d) => d.id)); }
-    else { state.multi = false; state.reveal = new Set(); state.open.clear(); }
+    if (b.dataset.act === 'open') { state.multi = true; state.closing = new Set(); state.reveal = new Set([...DOMAINS.map((d) => d.id)].filter((id) => !state.open.has(id))); state.open = new Set(DOMAINS.map((d) => d.id)); }
+    else { state.multi = false; state.reveal = new Set(); state.closing = new Set([...state.open]); state.open.clear(); }
     animate(() => paint());
   });
   const eb = $('#tl-edit'); if (eb) eb.addEventListener('click', onEdit);

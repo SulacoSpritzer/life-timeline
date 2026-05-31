@@ -88,7 +88,9 @@ a{color:var(--accent)}
 
 .dbody{flex:1; min-width:0; height:0; overflow:hidden}
 .tl-domains.animating .dbody{transition:height .44s cubic-bezier(.4,0,.2,1)}
-@media (prefers-reduced-motion: reduce){.tl-domains.animating .dbody{transition:none}}
+@keyframes svgfade{from{opacity:0} to{opacity:1}}
+.dbody.settle > svg{animation:svgfade .3s ease}
+@media (prefers-reduced-motion: reduce){.tl-domains.animating .dbody{transition:none} .dbody.settle > svg{animation:none}}
 svg{display:block}
 
 .item{cursor:pointer}
