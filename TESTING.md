@@ -60,6 +60,22 @@ UI change: run the app (`python3 devserver.py 4601`), and confirm onboarding com
 renders, a domain opens/closes, an item's detail + tooltip show a source, and the console is error-free.
 (A Playwright pass is the natural next addition when we want this automated.)
 
+## Synthetic-persona eval (does it feel helpful / authentic?)
+
+A matrix of synthetic users spanning sex, age, class, education, collar, and health
+(`tests/personas.js`) is evaluated two ways:
+
+- **Deterministic (routine, in `npm test`/CI)** — `tests/personas.test.js`: every persona produces
+  a valid, **differentiated**, internally-consistent timeline. Guards against "everyone gets the
+  same life", uniform life expectancy, future events for the elderly, and broken gating.
+- **LLM judge (on demand — costs tokens)** — render a persona's timeline to text with
+  `tests/eval/render.js`, then have a judge model score **helpful (0–5)** and **authentic (0–5)** with
+  rationale. To run a batch: render the personas to files, then judge each (a Workflow fan-out, or a
+  few `Agent` calls). The first run already surfaced real issues (generic heuristic filler, recorded
+  events not propagating, a mis-cited presbyopia source) — that's the point.
+
+To add a persona: append to `tests/personas.js`; the deterministic sweep covers it automatically.
+
 ## Conventions
 
 - Tests live in `tests/`, named `*.test.js`, using `node:test` + `node:assert/strict`.
